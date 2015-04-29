@@ -118,15 +118,87 @@ Compilers 2014
 <h1>Symbol Table</h1>
 
 <h2>Specifications</h2>
-<p>
-Click <a href="../../../01_Introduction/2_Project_Specifications/3_Symbol_Table_Specifications.html">here</a><a href="../../../01_Introduction/2_Project_Specifications/3_SymbolTable.html"></a> to view the symbol table specifications.
-</p>
+<pre class="prettyprint" ><code class="language-java">
+SymbolTable.cpp:Build the SymbolTable
+SymbolTable.h
+
+Symbol.cpp:Operating of Symbol  	
+Symbol.h 
+
+1.Use SymbolTable::createTable create a SymbolTable
+2.Use SymbolTable::insert add the value in SymbolTable
+3.Output SymbolTable use SymbolTable::printTable
+
+</code></pre>
 
 <h2>Source Listing</h2>
 <pre class="prettyprint" ><code class="language-java">
-Replace these lines with your symbol table code.  
-BE SURE THAT THERE ARE NO POORLY WRAPPED LINES,
-AND THAT YOUR CODE IS READABLE, AND THAT IT FITS WITHIN THE BOUNDARIES.</code></pre>
+Some example of SymbolTable code
+
+SymbolTable* SymbolTable::createTable(Lexeme lexeme, LexemeResources::DataType type)
+{
+	int childLevel = _level + 1;
+	SymbolTable* childTable = new SymbolTable(lexeme, type, childLevel, this);
+	
+	return childTable;
+}
+
+SymbolTable* SymbolTable::closeTable(int label)
+{
+	///size the size of the symbol table so this 
+	//symbol will have the correct size
+	//when it is refered to
+
+	unordered_map<string, Symbol>::const_iterator symbolIt = _symbolLookup.begin();
+	while (symbolIt != _symbolLookup.end()){
+		_size += symbolIt->second.size();
+		symbolIt++;
+	}
+
+	//clear the current entries in the table
+	_symbolLookup.clear();
+
+	if (_parentTable){
+		Symbol newSymbol(_lexeme, _dataType, _level, 0, _size);
+		newSymbol.setLabel(label);
+		newSymbol.setArgumentTypes(this->argumentTypes());
+		newSymbol.setFunProd(true);
+		//add itself to the parent table
+		_parentTable->insert(newSymbol);
+	}
+
+
+	return _parentTable;
+}
+
+
+void SymbolTable::insert(const Lexeme lex,const DataType type)
+{
+	int size = 1;
+	Symbol newSymbol(lex, type, _level, _currentOffset, size);
+	_currentOffset += size;
+	_size += size;
+
+	_symbolLookup[lex.getValue()] =  newSymbol;
+}
+
+void SymbolTable::printTable()
+{
+	//if (_symbolLookup.empty())
+		//return;
+	std::cout
+		<< "\nCurrent Table Name: " << lexeme().getValue()
+		<< "\nCurrent Table Level: " << level()
+		<< "\nCurrent Table Size : " << size();
+		//<< "\nCurrent Table Offset: " << offset()
+		//<< "\n";
+
+	std::cout << "\nSymbol Name:\tDataType: \tOffset: \tSize: \n";
+
+	for (auto& x : _symbolLookup)
+		std::cout << x.first << "\t\t" << x.second.dataType() << "\t\t" << x.second.offset() << "\t\t" << x.second.size() << std::endl;
+}
+
 </code></pre>
 <!-- InstanceEndEditable -->
 

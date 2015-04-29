@@ -117,17 +117,79 @@ Compilers 2014
 <h1>Scanner</h1>
 
 <h2>Specifications</h2>
-<p>
-Click <a href="../../../01_Introduction/2_Project_Specifications/1_Scanner_Specifications.html">here</a><a href="../../../01_Introduction/2_Project_Specifications/1_Scanner.html"></a> to view the scanner specifications.
-</p>
+<pre class="prettyprint"><code class="language-java">
+CMakeLists.txt 
+FiniteStateAutomaton.cpp:Check the type of token 
+FiniteStateAutomaton.h 
+Lexeme.cpp:Get type and value from lexeme 
+Lexeme.h 
+Resources.h:Contain all resources we used in program(LexemeResources LexemeType and so on) 
+Scanner.cpp:The main part of Scanner 
+Scanner.h 
+Token.cpp:Operating of token (get number/lexeme and so on) 
+Token.h      
+TokenStream.cpp:build token file for parser     
+TokenStream.h 
+
+1.Use Scanner.cpp read token from file one by one. 
+2.Scan token use  Scanner::scanNextToken() 
+3.In Scanner::scanNextToken() use FiniteStateAutomaton.cpp  to check the type of token then return token  if it is correct, or return error.
+4. Use TokenStream.cpp to build a token file for parser 
+</code></pre>
 
 <h2>Source Listing</h2>
 
 <pre class="prettyprint"><code class="language-java">
-Replace these lines with your scanner code. 
-BE SURE THAT THERE ARE NO POORLY WRAPPED LINES,
-AND THAT YOUR CODE IS READABLE, AND THAT IT FITS WITHIN THE BOUNDARIES.
+Some example of scanner
+
+Token Scanner::getNextToken()
+{
+	Token next;
+
+	do{
+		//skip all whitespace 
+		next = scanNextToken();
+	} while (next.getLexeme().getType() == MP_WHITESPACE);
+
+	//only need to check identifiers
+	//to see if they are reserved words
+	if (next.getLexeme().getType() == MP_IDENTIFIER)
+		checkReserved(next);
+
+	return next;
+}
+
+Token FiniteStateAutomaton::singleCharFSA(istream* stream, char c, LexemeType type, int& line, int& currentColumn)
+{
+	int column = currentColumn;
+	char next;
+	string name;
+
+	//Start State
+	{
+		next = stream->peek();
+
+		if (next == c){
+			name += stream->get();
+			currentColumn++;
+			goto Accept;
+		}
+
+		goto Reject;
+	}
+
+Accept:
+	{
+		return Token(type, name, line, column);
+	}
+
+Reject:
+	{
+		return Token();
+	}
+}
 </code></pre>
+
 <!-- InstanceEndEditable -->
 
 </article>

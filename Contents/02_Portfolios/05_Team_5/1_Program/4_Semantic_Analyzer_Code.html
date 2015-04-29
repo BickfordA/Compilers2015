@@ -117,16 +117,129 @@ Compilers 2014
 <h1>Semantic Analyzer</h1>
 
 <h2>Specifications</h2>
-<p>
-Click <a href="../../../01_Introduction/2_Project_Specifications/4_Semantic_Analyzer_Specifications.html">here</a><a href="../../../01_Introduction/2_Project_Specifications/4_Semantic_Analyzer_Specifications.html"></a> to view the semantic analyzer specifications.
-</p>
+<pre class="prettyprint" ><code class="language-java">	
+SemanticAnalyzer.cpp:SemanticAnalyzer  	
+SemanticAnalyzer.h 	
+
+SemanticRecord.cpp:Operating of SymbolRecord  	
+SemanticRecord.h 	
+
+</code></pre>
 
 <h2>Source Listing</h2>
 
 <pre class="prettyprint" ><code class="language-java">
-Replace these lines with your semantic analyzer code.  
-BE SURE THAT THERE ARE NO POORLY WRAPPED LINES,
-AND THAT YOUR CODE IS READABLE, AND THAT IT FITS WITHIN THE BOUNDARIES.
+Some example of SemanticAnalyzer code
+
+bool SemanticAnalyser::insertSymbol(SemanticRecord& record)
+{
+	while (record.size() > 0 )
+	{
+		if (record.showNextOperandAs<LexemeOperand>()){
+			LexemeOperand* nextOp = record.showNextOperandAs<LexemeOperand>();
+			assert(nextOp);
+			insertSymbol(nextOp->getLexeme(), nextOp->type());
+		}
+		else{
+			assert(false);
+			return false;
+		}
+		delete record.getNextOperandPointer();
+	}
+	return true;
+}
+
+void SemanticAnalyser::whileStatementPostbody(int repeatLabel, int exitLabel)
+{
+	_outFile << "BR L" << repeatLabel << " \n";
+	_outFile << "L" << exitLabel << ":\n";
+
+	if (ENABLE_DEBUGGING)
+		_outFile << "; end 'while' loop \n\n";
+}
+
+
+void SemanticAnalyser::forBegin(int& beginCondition,int& exitLoop, SemanticRecord& controlVars)
+{
+	//we need to allocate the space for the variables
+	
+	LexemeOperand lexOp1 = controlVars.getNextOperandAsLexeme();
+	MachineVal initVal = generateMachineValue(lexOp1.getLexeme());
+
+	//we dont use this for anything because this is on top of the stack
+	Operand lexOp2 = controlVars.getNextOperand();
+	//MachineVal assignedVal = generateMachineValue(lexOp2.getLexeme());
+
+	LexemeOperand lexOp3 = controlVars.getNextOperandAsLexeme();
+	MachineVal stepVal = generateMachineValue(lexOp3.getLexeme());
+	//this should be a -1 or 1 depending on if
+	//we are going up or down. 
+
+	//this is on the stack as well so no neet to use it
+	Operand lexOp4 = controlVars.getNextOperand();
+	//MachineVal finalVal = generateMachineValue(lexOp4.getLexeme());
+
+	controlVars.addOperand(new LexemeOperand( lexOp1));
+
+	if (ENABLE_DEBUGGING)
+		_outFile << "\n;         Begin 'for' loop\n";
+
+	//int level = _currentTable->level() ;
+	//
+	//the intial value is on the stack and will be located at -1 offset current level
+	_outFile << "PUSH " << initVal.value << " \n"; //for current value
+
+	//set SP for offset into control vars
+	//_outFile << "MOV SP D" << to_string(level) << " \n";
+
+
+	//_outFile << "PUSH " << initVal.value << " \n";
+
+	//change the loop variable to its assignment
+	//_outFile << "PUSH " << "-3(D" << level << ") \n";
+	_outFile << "PUSH " << "-3(SP) \n"; //one 
+	_outFile << "POP " << initVal.value << " \n"; //zero
+
+	//////////////////////////////////////
+	////////////initialized
+	//////////////////////////////////////
+
+	//skip loop increment the first time
+	int skipIncrement = getNextLabelVal();
+	_outFile << "BR L" << skipIncrement << "\n";
+
+	//begin the the condition check
+	beginCondition = getNextLabelVal();
+	_outFile << "L" << beginCondition << ": \n";
+
+	//update the loop variable
+	_outFile << "PUSH " << stepVal.value << " \n"; //one 
+	_outFile << "PUSH " << initVal.value << " \n"; //one two
+	_outFile << "ADDS " << " \n"; //one
+	_outFile << "POP " << "-3(SP) \n";// -3  // zero
+	_outFile << "PUSH " << "-3(SP) \n";//one
+	_outFile << "POP " << initVal.value << " \n";//zero
+	//loop variable updated
+
+	_outFile << "L" << skipIncrement << ": \n";
+
+	//check against limit
+	_outFile << "PUSH " << "-3(SP) \n"; //one
+	_outFile << "PUSH " << "-3(SP) \n"; //two
+	//limit checked
+
+	string compare = stepVal.value == "#-1" ? "CMPGES" : "CMPLES";
+	_outFile << compare << "\n";
+
+	exitLoop = getNextLabelVal();
+	_outFile << "BRFS L" << to_string(exitLoop) << " \n";
+
+
+	//if the step is negative we continue if greater than the condition
+	//otherwise we want to continue if the value is less than the condition
+
+}
+
 </code></pre>
 
 <!-- InstanceEndEditable -->
