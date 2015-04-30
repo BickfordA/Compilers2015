@@ -434,9 +434,11 @@ bool Grammar::booleanExpression(SemanticRecord& record)
 	case MP_LPAREN:
 	case MP_MINUS:
 	case MP_PLUS:
-		match();
+		match(); //shouldn't match here, throwing off parentheses
 		logRule(111);
 		expression(record);
+		//if (nextTokenType() == MP_RPAREN){		Possible workaround but breaks program...
+		//	match();}
 		return true;
 	default:
 		error(TypeList() << MP_FALSE << MP_NOT << MP_TRUE 

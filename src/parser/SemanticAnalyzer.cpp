@@ -45,9 +45,9 @@ bool SemanticAnalyser::createTable(const Lexeme lexeme, DataType type)
 	const Symbol match = _currentTable->lookup(lexeme.getValue(), found);
 
 	if (found && 
-		(match.lexeme().getValue() != "while" || 
-		 match.lexeme().getValue() != "for" ||
-		 match.lexeme().getValue() != "if" || match.lexeme().getValue() != "repeat"))
+		(match.lexeme().getValue() != "while" && 
+		 match.lexeme().getValue() != "for" &&
+		 match.lexeme().getValue() != "if" && match.lexeme().getValue() != "repeat"))
 
 	{//there is already an entry with this name
 		symbolCollisionError(Token(lexeme, -1, -1));
