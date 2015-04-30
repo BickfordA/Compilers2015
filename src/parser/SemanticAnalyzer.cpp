@@ -354,7 +354,7 @@ void SemanticAnalyser::ifStatementElse(int currentLabel, int&nextLabel)
 {
 	//end of true section jump to the end 
 	nextLabel = getNextLabelVal();
-	_outFile << "L" << nextLabel << ":\n";
+	_outFile << "BR L" << nextLabel << "\n";
 
 
 	//the if was false start here 
