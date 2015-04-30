@@ -183,7 +183,7 @@ bool Grammar::forStatement()
 	{
 	case MP_FOR:{
 		logRule(61);
-		_semanticAnalyser->createTable(currentLexeme(), UnknownData);
+		//_semanticAnalyser->createTable(currentLexeme(), UnknownData);
 		match();
 		controlVariable(forStatement_rec);
 		//_semanticAnalyser->createTable(forStatement_rec.getNextId(), VoidData);
@@ -207,7 +207,7 @@ bool Grammar::forStatement()
 		//_semanticAnalyser->printCurrentTable();
 		//_semanticAnalyser->closeTable();
 		_semanticAnalyser->forEndBody(begin, exitLoop, forStatement_rec);
-		_semanticAnalyser->closeTable();
+		//_semanticAnalyser->closeTable();
 		return true; }
 	default:
 		error(TypeList() << MP_FOR);
