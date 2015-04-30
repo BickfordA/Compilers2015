@@ -418,7 +418,7 @@ void SemanticAnalyser::writeList(SemanticRecord& writeSymbols, bool writeLn)
 void SemanticAnalyser::repeatBegin(int& beginLabel)
 {
 	beginLabel = getNextLabelVal();
-	_outFile << "L:" << beginLabel << "\n";
+	_outFile << "L" << beginLabel << ":\n";
 }
 
 void SemanticAnalyser::repeatExit(int repeatLabel)
@@ -426,7 +426,7 @@ void SemanticAnalyser::repeatExit(int repeatLabel)
 	//repeat condition will leave false on the stack if it fails
 	//and we will continue
 
-	_outFile << "BRTS L" << repeatLabel << "\n";
+	_outFile << "BRFS L" << repeatLabel << "\n";
 }
 
 void SemanticAnalyser::forBegin(int& beginCondition,int& exitLoop, SemanticRecord& controlVars)
