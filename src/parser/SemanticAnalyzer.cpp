@@ -44,15 +44,12 @@ bool SemanticAnalyser::createTable(const Lexeme lexeme, DataType type)
 	bool found = false;
 	const Symbol match = _currentTable->lookup(lexeme.getValue(), found);
 
-	if (found && 
-		(match.lexeme().getValue() != "while" && 
-		 match.lexeme().getValue() != "for" &&
-		 match.lexeme().getValue() != "if" && match.lexeme().getValue() != "repeat"))
-
+	if (found)
 	{//there is already an entry with this name
 		symbolCollisionError(Token(lexeme, -1, -1));
 		return false;
 	}
+
 	int nextLabel = getNextLabelVal();
 	writeCommand("L" + to_string(nextLabel) + ":");
 	_currentTable = _currentTable->createTable(lexeme, type);
@@ -275,6 +272,7 @@ MachineVal SemanticAnalyser::generateMachineValue(Lexeme lex)
 		machineVal = intLitToVal(lex.getValue());
 		break;
 	case MP_FLOAT_LIT:
+	case MP_FIXED_LIT:
 		type = FloatData;
 		machineVal = floatLitToVal(lex.getValue());
 		break;
@@ -540,6 +538,15 @@ void SemanticAnalyser::forEndBody(int loopAgain, int exitLoop, SemanticRecord& i
 
 }
 
+list<DataType> SemanticAnalyser::arguments(LexemeOperand lexop)
+{
+	bool ok = false;
+	const Symbol funSymbol = lookupSymbol(lexop.getName(), ok);
+
+	list<DataType> argTypes = funSymbol.argumentTypes();
+	return argTypes;
+}
+
 void SemanticAnalyser::prodCall(SemanticRecord& id, SemanticRecord& args)
 {
 	//look up the function
@@ -550,51 +557,53 @@ void SemanticAnalyser::prodCall(SemanticRecord& id, SemanticRecord& args)
 	const Symbol funSymbol = lookupSymbol(fun->getName(), ok);
 
 	list<DataType> argTypes = funSymbol.argumentTypes();
+	
 
+	//TODO: check the input types vs the required types
 
-	while (args.size() > 0){
-		if (argTypes.size() == 0){
-			//error out with "Incorrect number of arguments"
-			assert(false);
-			break;
-		}
-		DataType nextArgType = argTypes.front();
-		argTypes.pop_front();
+	//while (args.size() > 0){
+	//	if (argTypes.size() == 0){
+	//		//error out with "Incorrect number of arguments"
+	//		assert(false);
+	//		break;
+	//	}
+	//	DataType nextArgType = argTypes.front();
+	//	argTypes.pop_front();
 
-		if (args.showNextOperandAs<LexemeOperand>()){
-			LexemeOperand nextArg = args.getNextOperandAsLexeme();
-			if (DataIsAddress(nextArgType)){
-				//then we need to push the address of the value 
-				//on to the stack
-				bool ok;
-				DataType outType;
-				string addr = lookupSymbolAddress(nextArg.getName(), ok, outType);
+	//	if (args.showNextOperandAs<LexemeOperand>()){
+	//		LexemeOperand nextArg = args.getNextOperandAsLexeme();
+	//		if (DataIsAddress(nextArgType)){
+	//			//then we need to push the address of the value 
+	//			//on to the stack
+	//			bool ok;
+	//			DataType outType;
+	//			string addr = lookupSymbolAddress(nextArg.getName(), ok, outType);
 
-				if (!ok){
-					assert(false);
-					//argument not found
-				}
-				if (outType != DataAsReferenceType(nextArgType)){
-					assert(false);
-					//incorrect argument type
-				}
+	//			if (!ok){
+	//				assert(false);
+	//				//argument not found
+	//			}
+	//			if (outType != DataAsReferenceType(nextArgType)){
+	//				assert(false);
+	//				//incorrect argument type
+	//			}
 
-				Symbol matchingSymbol = lookupSymbol(nextArg.getName(), ok);
+	//			Symbol matchingSymbol = lookupSymbol(nextArg.getName(), ok);
 
-				writeCommand("PUSH D" + to_string(matchingSymbol.level()));
-				writeCommand("PUSH #" +to_string( matchingSymbol.offset()));
-				writeCommand("ADDS");
-			}
-			else{
-				//just push the value its self
-				push(&nextArg, nextArgType);
-			}
-		}
-		else{
-			//they should all have lexemes so we can lok them up
-			assert(false);
-		}
-	}
+	//			writeCommand("PUSH D" + to_string(matchingSymbol.level()));
+	//			writeCommand("PUSH #" +to_string( matchingSymbol.offset()));
+	//			writeCommand("ADDS");
+	//		}
+	//		else{
+	//			//just push the value its self
+	//			push(&nextArg, nextArgType);
+	//		}
+	//	}
+	//	else{
+	//		//they should all have lexemes so we can lok them up
+	//		assert(false);
+	//	}
+	//}
 
 	writeCommand("CALL L" + to_string(funSymbol.label()));
 }
@@ -608,7 +617,7 @@ Operand* SemanticAnalyser::funCall(SemanticRecord& id, SemanticRecord& args)
 	bool ok = false;
 	const Symbol funSymbol = lookupSymbol(fun->getName(), ok);
 
-	return new StackOperand(fun->type());
+	return new StackOperand(funSymbol.dataType());
 }
 
 void SemanticAnalyser::insertArguments(SemanticRecord& inputRecord)
@@ -743,16 +752,19 @@ StackOperand SemanticAnalyser::infixStackCommand(SemanticRecord& infixSymbols)
 	//or to take the type of the first value (current behavior)
 
 	Operand * first = infixSymbols.getNextOperandPointer();
-	push(first);
 
 	CommandOperand command = infixSymbols.getNextOperandAsCommand();
 
+	DataType type = command.type() == UnknownData ? first->type() : command.type();
+
+	push(first, type);
+
 	Operand* second = infixSymbols.getNextOperandPointer();
-	push(second, first->type());
+	push(second, type);
 
 	writeCommand(command.getCommand());
 
-	StackOperand retVal = StackOperand(command.type() == UnknownData ? first->type() : command.type());
+	StackOperand retVal = StackOperand(command.type() == UnknownData ? first->type() : type);
 	
 	//we own these as soon as the are take from the SemanticRecord
 	//delete them now that we are done 
@@ -762,11 +774,38 @@ StackOperand SemanticAnalyser::infixStackCommand(SemanticRecord& infixSymbols)
 	return retVal;
 }
 
+StackOperand SemanticAnalyser::pushAddress(Lexeme lex, DataType type)
+{
+	LexemeOperand nextArg(lex, type);
+	//then we need to push the address of the value 
+	//on to the stack
+	bool ok;
+	DataType outType;
+	string addr = lookupSymbolAddress(nextArg.getName(), ok, outType);
+
+	if (!ok){
+		assert(false);
+		//argument not found
+	}
+	if (DataAsReferenceType(outType) != DataAsReferenceType(type)){
+		assert(false);
+		//incorrect argument type
+	}
+
+	Symbol matchingSymbol = lookupSymbol(nextArg.getName(), ok);
+
+	writeCommand("PUSH D" + to_string(matchingSymbol.level()));
+	writeCommand("PUSH #" + to_string(matchingSymbol.offset()));
+	writeCommand("ADDS");
+
+	return StackOperand(type);
+}
+
 StackOperand SemanticAnalyser::push(Lexeme lex, DataType type)
 {
 	LexemeOperand * lexOp = new LexemeOperand(lex, UnknownData);
 
-	push(lexOp);
+	push(lexOp, type);
 	StackOperand retVal(lexOp->type());
 
 	delete lexOp;
@@ -831,8 +870,10 @@ void SemanticAnalyser::push(Operand* val, DataType castType)
     _outFile.flush();
 }
 
-void SemanticAnalyser::cast(const DataType valType,const DataType toType)
+void SemanticAnalyser::cast(DataType valType, DataType toType)
 {
+	valType = DataAsReferenceType(valType);
+	toType = DataAsReferenceType(toType);
 	if (valType == toType){
 		return; //already the correct type
 	}

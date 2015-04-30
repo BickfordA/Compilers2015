@@ -53,7 +53,9 @@ Operand* SemanticRecord::getNextOperandPointer()
 		nextOp = _identifiers.front();
 		_identifiers.pop_front();
 	}
-
+	if (!nextOp){
+		assert(nextOp);
+	}
 	return nextOp;
 }
 
