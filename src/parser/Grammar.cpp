@@ -113,11 +113,15 @@ bool Grammar::factor(SemanticRecord& factor_rec)
 			logRule(103);
 			match();
 			return true;
-		case MP_NOT:
+		case MP_NOT:{
 			logRule(104);
 			match();
-			factor(factor_rec);
-			return true;
+			SemanticRecord noteRecord;
+			noteRecord.addOperand(new LexemeOperand(Lexeme(MP_FALSE, "false"), IntData));
+			noteRecord.addOperand(new CommandOperand("CMPEQS", IntData));
+			factor(noteRecord);
+			factor_rec.addOperand( _semanticAnalyser->infixStackCommand(noteRecord));
+			return true; }
 		case MP_LPAREN:
 			logRule(105);
 			match();

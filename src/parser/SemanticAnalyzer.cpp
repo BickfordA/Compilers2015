@@ -277,11 +277,11 @@ MachineVal SemanticAnalyser::generateMachineValue(Lexeme lex)
 		machineVal = floatLitToVal(lex.getValue());
 		break;
     case MP_TRUE:
-        type = BoolData;
+        type = IntData;//there isnt a bool type in uMachine
         machineVal = "#1";
         break;
     case MP_FALSE:
-        type = BoolData;
+        type = IntData;
         machineVal = "#0";
         break;
 	case MP_TO:
