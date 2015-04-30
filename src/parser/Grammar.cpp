@@ -346,8 +346,7 @@ bool Grammar::addingOperator(SemanticRecord& record)
 		match();
 		return true;
 	case MP_OR:
-		//TODO:: Find out what or does, is this a comparison
-		record.addOperand(CommandOperand("SUBS"));
+		record.addOperand(CommandOperand("ADDS"));
 		logRule(90);
 		match();
 		return true;
@@ -1792,7 +1791,6 @@ bool Grammar::termTail(SemanticRecord& record)
 	{
 	case MP_PLUS:
 	case MP_MINUS:
-	case MP_OR:
 		logRule(83);
 		addingOperator(record);
 		term(record);
@@ -1800,6 +1798,21 @@ bool Grammar::termTail(SemanticRecord& record)
 		//we should have enough to complete this command now
 		// and we pass the command on to the nex part of the tail
 		return termTail(record);
+	case MP_OR:{
+		logRule(83);
+		SemanticRecord intermediaryRec;
+		intermediaryRec.addOperand(record.getNextOperandPointer());
+		addingOperator(intermediaryRec);
+		term(intermediaryRec);
+		_semanticAnalyser->infixStackCommand(intermediaryRec); //add the two values
+		//check if greater than 0
+		_semanticAnalyser->push(Lexeme(MP_INTEGER_LIT, "0"), IntData);
+		_semanticAnalyser->writeCommand("CMPGTS");
+
+		record.addOperand(new StackOperand(IntData));
+		//we should have enough to complete this command now
+		// and we pass the command on to the nex part of the tail
+		return termTail(record); }
 	case MP_DO: //do
 	case MP_DOWNTO: //downto
 	case MP_ELSE: //else
