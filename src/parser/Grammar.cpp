@@ -562,15 +562,11 @@ bool Grammar::factorTail(SemanticRecord& factorTail_rec)
 	case MP_TIMES:{
 		logRule(92);
 		multiplyingOperator(factorTail_rec);
-		SemanticRecord multiplyRight;
-		factor(multiplyRight);
-		factorTail(multiplyRight);
-		factorTail_rec.addOperand(multiplyRight.getNextOperandPointer());
+		factor(factorTail_rec);
+		factorTail_rec.addOperand(_semanticAnalyser->infixStackCommand(factorTail_rec));
+		factorTail(factorTail_rec);
 
 		//we should have enough now to perform the multiplcation operation
-		factorTail_rec.addOperand(_semanticAnalyser->infixStackCommand(factorTail_rec));
-		assert(multiplyRight.size() == 0);
-		
 		return true; }
 	case MP_DO:
 	case MP_DOWNTO:
