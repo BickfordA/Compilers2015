@@ -440,6 +440,11 @@ FixedLitTrailingInt:
 			goto FloatLitE;
 		}
 
+		if (charIsDigit(next)){
+			temp += stream->get();
+			goto FixedLitTrailingInt;
+		}
+
 		name += temp;
 		currentColumn += temp.size();
 
