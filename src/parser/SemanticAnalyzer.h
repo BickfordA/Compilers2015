@@ -84,6 +84,8 @@ public:
 	void forBegin(int& beginCondition, int& exitLoop, SemanticRecord& controlVars);
 	void forEndBody(int loopAgain, int exitLoop, SemanticRecord& intialRecord);
 
+	std::list<LexemeResources::DataType> arguments(LexemeOperand lexop);
+
 	Operand* funCall(SemanticRecord& id, SemanticRecord& args);
 	void prodCall(SemanticRecord& id, SemanticRecord& args);
 
@@ -111,11 +113,16 @@ public:
 	// Operand Command Operand
 	StackOperand infixStackCommand(SemanticRecord& infixSymbols);
 
+	StackOperand pushAddress(Lexeme lex, LexemeResources::DataType);
+
 	StackOperand push(Lexeme lex, LexemeResources::DataType type = LexemeResources::UnknownData);
 
 	void writeCommand(const std::string command);
 
 private:
+	//if we are in a function call dont imediatly push all values to the stack 
+	bool _inFunctionCall;
+
 	//these are some helper functions so i can be lazy in creating
 	//the functions for writing command
 	Operand twoValueCommand(const std::string command, SemanticRecord records);
@@ -125,7 +132,7 @@ private:
 	//value that we are working with, this will make 
 	//debugging the uMachine code alot easier.
 	void push(Operand* val, const LexemeResources::DataType castType = LexemeResources::UnknownData);
-	void cast(const LexemeResources::DataType valType, const LexemeResources::DataType toType);
+	void cast(LexemeResources::DataType valType, LexemeResources::DataType toType);
 	
 
 	//file pointer
