@@ -838,9 +838,8 @@ bool Grammar::ifStatement()
 		SemanticRecord statementRec;
 		statement(statementRec);
 		SemanticRecord elseRec;
-		if (optionalElsePart()){
-			_semanticAnalyser->ifStatementElse(jumpLabel, jumpLabel);
-		}
+		_semanticAnalyser->ifStatementElse(jumpLabel, jumpLabel);
+		optionalElsePart();
 		_semanticAnalyser->ifStatementEnd(jumpLabel);
 		return true; }
 
