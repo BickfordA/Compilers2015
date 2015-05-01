@@ -67,7 +67,9 @@ Operand SemanticRecord::getNextOperand()
 		nextOp = _identifiers.front();
 		_identifiers.pop_front();
 	}
-	throw SemanticAnaylserException("Getting next operand, when there isnt one");
+	else{
+		throw SemanticAnaylserException("Getting next operand, when there isnt one");
+	}
 
 	return *nextOp;
 }
@@ -80,7 +82,9 @@ LexemeOperand SemanticRecord::getNextOperandAsLexeme()
 		nextOp = dynamic_cast<LexemeOperand*>( _identifiers.front());
 		_identifiers.pop_front();
 	}
-	throw SemanticAnaylserException("Getting next operand, when there isnt one");
+	else{
+		throw SemanticAnaylserException("Getting next operand, when there isnt one");
+	}
 
 	if (nextOp)
 		return *nextOp;
