@@ -3,22 +3,36 @@ program NestedFunctionsByTravis;
 	var x,y,z : Integer;
 	
 	procedure haveTwo;
-		function addTwo(var x, y:Integer):Integer;
-			var m,n,o,p:Integer;
-			begin
-				m := x + y;
-			end;
+		var m,n :Integer;
 		begin
 <<<<<<< HEAD
 			m:=2;
 			n:=2;
+<<<<<<< HEAD
 			z:=addTwo(m,n);
 =======
 			x:=2;
 			y:=2;
 			z:=addTwo(x, y);
 >>>>>>> 54d5b665c6cf210187e68d8566d0e583b66b8891
+=======
+			z:=8;
+>>>>>>> c20a6f113d572eaf77cddb5b7f36c190afda9dad
 		end;
+		
+		
+	function addTwo(var x, y:Integer):Integer;
+		var m,o,p:Integer;
+		begin
+			m := x + y;
+		end;
+
 	begin
-		writeln(x);
+		x := 4;
+		haveTwo;
+		writeln(z);
+
+		y := 1;
+		z:=addTwo(x,y);
+		writeln(z);
 	end.

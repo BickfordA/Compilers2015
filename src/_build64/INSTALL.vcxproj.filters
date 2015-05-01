@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Tinku\Compilers2015\src\_build64\CMakeFiles\88985d48ba288cb895b0300731d0393e\INSTALL_force.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{1AA2AAB2-0C2D-4B57-9428-24FB32E3AF7B}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

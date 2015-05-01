@@ -26,7 +26,7 @@ SymbolTable* SymbolTable::createTable(Lexeme lexeme, LexemeResources::DataType t
 	return childTable;
 }
 
-SymbolTable* SymbolTable::closeTable(bool includeInParent)
+SymbolTable* SymbolTable::closeTable(int label)
 {
 	///size the size of the symbol table so this 
 	//symbol will have the correct size
@@ -43,6 +43,10 @@ SymbolTable* SymbolTable::closeTable(bool includeInParent)
 
 	if (_parentTable){
 		Symbol newSymbol(_lexeme, _dataType, _level, 0, _size);
+		newSymbol.setLabel(label);
+		newSymbol.setArgumentTypes(this->argumentTypes());
+		newSymbol.setProd(this->funProd());
+		newSymbol.setFun(this->function());
 		//add itself to the parent table
 		_parentTable->insert(newSymbol);
 	}
@@ -83,9 +87,33 @@ void SymbolTable::insert(Symbol tableSymbol)
 	_size = _currentOffset;
 }
 
+const Symbol SymbolTable::lookUpAtLevel(const string name, bool& outFound)
+{
+	outFound = true;
+
+	try{
+		return _symbolLookup.at(name);
+	}
+	catch (out_of_range){
+		outFound = false;
+
+		return Symbol();
+	}
+}
+
 const Symbol SymbolTable::lookup(const string name, bool& outFound)
 {
 	outFound = true;
+	
+	if (name == _lexeme.getValue()){
+		Symbol thisSym(*this);
+		if (this->function())
+			thisSym.setOffset(-11);
+		thisSym.setFun(this->function());
+		thisSym.setProd(this->funProd());
+		return thisSym;
+	}
+	
 	try{
 		return _symbolLookup.at(name);
 	}

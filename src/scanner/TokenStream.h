@@ -4,7 +4,7 @@
 #include "Token.h"
 #include "Resources.h"
 
-#include <queue>
+#include <list>
 
 class TokenStream
 {
@@ -14,6 +14,7 @@ public:
 	
 	
 	bool nextToken(Token& nextToken) const;
+	bool secondNextToken(Token& nextToken) const;
 	LexemeResources::LexemeType nextTokenType() const;
 	
 	void addToken(Token newToken);
@@ -22,7 +23,7 @@ public:
 
 protected:
 
-	std::queue<Token> _toRead;
+	std::list<Token> _toRead;
 };
 
 

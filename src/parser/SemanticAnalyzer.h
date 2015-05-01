@@ -12,6 +12,14 @@
 #include <iostream>
 #include <fstream>
 
+struct SemanticAnaylserException : public std::runtime_error
+{
+	SemanticAnaylserException(std::string const& message)
+		: std::runtime_error(message)
+	{
+	}
+};
+
 
 struct MachineVal
 {
@@ -39,6 +47,8 @@ public:
 	bool createTable(LexemeOperand operand);
 	bool createTable(const Lexeme token, LexemeResources::DataType type);
 	void closeTable(bool deleteEntry= false); 
+	void setTableAsFunction();
+	void setTableAsProcedure();
 
 	bool insertSymbol(const Lexeme lex, LexemeResources::DataType type);
 	bool insertArgument(const Lexeme lex, const int offset, const LexemeResources::DataType type);
@@ -84,9 +94,13 @@ public:
 	void forBegin(int& beginCondition, int& exitLoop, SemanticRecord& controlVars);
 	void forEndBody(int loopAgain, int exitLoop, SemanticRecord& intialRecord);
 
-	void funProdCall(SemanticRecord& id, SemanticRecord& args);
+	std::list<LexemeResources::DataType> arguments(LexemeOperand lexop);
+
+	Operand* funCall(SemanticRecord& id, SemanticRecord& args);
+	void prodCall(SemanticRecord& id, SemanticRecord& args);
 
 	void generateActivationRecord(int beginRecord);
+	void restoreRegisterState();
 
 	void insertArguments(SemanticRecord& inputArgs);
 
@@ -110,11 +124,16 @@ public:
 	// Operand Command Operand
 	StackOperand infixStackCommand(SemanticRecord& infixSymbols);
 
+	StackOperand pushAddress(Lexeme lex, LexemeResources::DataType);
+
 	StackOperand push(Lexeme lex, LexemeResources::DataType type = LexemeResources::UnknownData);
 
 	void writeCommand(const std::string command);
 
 private:
+	//if we are in a function call dont imediatly push all values to the stack 
+	bool _inFunctionCall;
+
 	//these are some helper functions so i can be lazy in creating
 	//the functions for writing command
 	Operand twoValueCommand(const std::string command, SemanticRecord records);
@@ -124,7 +143,7 @@ private:
 	//value that we are working with, this will make 
 	//debugging the uMachine code alot easier.
 	void push(Operand* val, const LexemeResources::DataType castType = LexemeResources::UnknownData);
-	void cast(const LexemeResources::DataType valType, const LexemeResources::DataType toType);
+	void cast(LexemeResources::DataType valType, LexemeResources::DataType toType);
 	
 
 	//file pointer

@@ -1,0 +1,210 @@
+<!DOCTYPE html> 
+<html><!-- InstanceBegin template="/Templates/page.dwt" codeOutsideHTMLIsLocked="false" -->
+
+<!-- Mirrored from hypertextbookshop.com/compilers2015/Contents/02_Portfolios/00_Team_0/1_Program/3_Symbol_Table_Code.html by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 27 Apr 2015 02:54:09 GMT -->
+<!-- Added by HTTrack --><meta http-equiv="content-type" content="text/html;charset=utf-8" /><!-- /Added by HTTrack -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<link rel="stylesheet" href="../../../../Stylesheets/prettify.css" />
+<link rel="stylesheet" href="../../../../Stylesheets/pageStylesheet.css" />
+<link rel="stylesheet" href="../../../../Stylesheets/navigationStylesheet.css" />
+<link rel="stylesheet" href="../../../../Stylesheets/allTextStyles.css" />
+<link rel="stylesheet" href="../../../../Stylesheets/colors-blue.css" />
+
+<script type="text/javascript" src="../../../../Scripts/google-code-prettify/run_prettify.js"></script>
+<script type="text/javascript" src="../../../../Scripts/recomputeAttributes.js"></script>
+
+
+<!-- InstanceBeginEditable name="doctitle" -->
+<title>Symobl Table</title>
+<!-- InstanceEndEditable -->
+</head>
+
+<body id="body-style">
+
+<!-- 
+<div id="browser-window-veil">
+</div>
+-->
+
+<div id="page-container">
+
+<header id="header">
+<div id="track-icon1">
+  <img src="../../../../Media/StyleImages/bobcat-small.png" alt="bobcat icon" width="75" height="48"></div>
+<div id="track-icon2">
+</div>
+<div id="track-icon3">
+</div>
+  <div id="headMatter">
+    <span id="headTitle1">
+      <!-- InstanceBeginEditable name="Header" -->
+        Team 5
+	  <!-- InstanceEndEditable --> 
+    </span>
+    <span id="headTitle2">
+    </span>
+  </div>
+</header>
+
+<nav id="navigate">
+<ul id="nav" >
+  <li><a href="../../../../default.html">Cover</a>
+  </li>
+  <li><a href="#">Contents</a>
+    <ul class="dropdownMenu">
+      <li><a href="../../../01_Introduction/1_Project_Overview/Overview_1.html">Introduction</a></li>
+      <li><a href="../0_Introduction/Cover.html">Portfolios</a></li>
+    </ul>
+  </li>
+  <li><a href="#">Portfolios</a>
+    <ul class="dropdownMenu">
+      <li><a href="../0_Introduction/Cover.html">Team 5</a></li>
+    </ul>
+  </li>
+  <li><a href="#">Team 5</a>
+    <ul class="dropdownMenu">
+      <li><a href="../0_Introduction/Cover.html">Introduction</a></li>
+      <li><a href="1_Scanner_Code.html">Program</a></li>
+      <li><a href="../2_Teamwork/teamwork.html">Teamwork</a></li>
+      <li><a href="../3_Design_Pattern/design_pattern.html">Design Pattern</a></li>
+      <li><a href="../4_Technical_Writing/Technical_Writing.html">Technical Writing</a></li>
+      <li><a href="../5_UML/1_Symbol_Table.html">UML</a></li>
+      <li><a href="../6_Design_Tradeoffs/Deesign_Tradeoffs.html">Design Tradeoffs</a></li>
+      <li><a href="../7_Life_Cycle/Life_Cycle.html">Life Cycle</a></li>
+    </ul>
+  </li>
+  <li><a href="#">Program</a>
+    <ul class="dropdownMenu">
+      <li><a href="1_Scanner_Code.html">Scanner Code </a></li>
+      <li><a href="2_Parser_Code.html">Parser Code </a></li>
+      <li><a href="3_Symbol_Table_Code.html">Symbol Table Code </a></li>
+      <li><a href="4_Semantic_Analyzer_Code.html">Semantic Analyzer Code </a></li>
+    </ul>
+  </li>
+  <li><a href="../../../../help.html" target="_blank">Help</a>
+  </li>
+</ul>
+</nav>
+
+
+<aside id="aside-left">
+<div id="asideLeftTitle">
+Compilers 2014
+</div>
+
+</aside>
+
+<aside id="aside-right">
+</aside>
+
+<footer id="footer">
+  <div id="footMatter">
+    <span id="previousPageLink">
+<a href="2_Parser_Code.html">< Previous</a>
+    </span>
+    <span id="currentPageNumber">
+      Page 3 of 4
+    </span>
+    <span id="nextPageLink">
+      <a href="4_Semantic_Analyzer_Code.html">Next ></a>
+    </span>
+  </div>
+</footer>
+
+<article id="mainContent">
+<!-- InstanceBeginEditable name="Main" -->
+<h1>Symbol Table</h1>
+
+<h2>Specifications</h2>
+<pre class="prettyprint" ><code class="language-java">
+SymbolTable.cpp:Build the SymbolTable
+SymbolTable.h
+
+Symbol.cpp:Operating of Symbol  	
+Symbol.h 
+
+1.Use SymbolTable::createTable create a SymbolTable
+2.Use SymbolTable::insert add the value in SymbolTable
+3.Output SymbolTable use SymbolTable::printTable
+
+</code></pre>
+
+<h2>Source Listing</h2>
+<pre class="prettyprint" ><code class="language-java">
+Some example of SymbolTable code
+
+SymbolTable* SymbolTable::createTable(Lexeme lexeme, LexemeResources::DataType type)
+{
+	int childLevel = _level + 1;
+	SymbolTable* childTable = new SymbolTable(lexeme, type, childLevel, this);
+	
+	return childTable;
+}
+
+SymbolTable* SymbolTable::closeTable(int label)
+{
+	///size the size of the symbol table so this 
+	//symbol will have the correct size
+	//when it is refered to
+
+	unordered_map<string, Symbol>::const_iterator symbolIt = _symbolLookup.begin();
+	while (symbolIt != _symbolLookup.end()){
+		_size += symbolIt->second.size();
+		symbolIt++;
+	}
+
+	//clear the current entries in the table
+	_symbolLookup.clear();
+
+	if (_parentTable){
+		Symbol newSymbol(_lexeme, _dataType, _level, 0, _size);
+		newSymbol.setLabel(label);
+		newSymbol.setArgumentTypes(this->argumentTypes());
+		newSymbol.setFunProd(true);
+		//add itself to the parent table
+		_parentTable->insert(newSymbol);
+	}
+
+
+	return _parentTable;
+}
+
+
+void SymbolTable::insert(const Lexeme lex,const DataType type)
+{
+	int size = 1;
+	Symbol newSymbol(lex, type, _level, _currentOffset, size);
+	_currentOffset += size;
+	_size += size;
+
+	_symbolLookup[lex.getValue()] =  newSymbol;
+}
+
+void SymbolTable::printTable()
+{
+	//if (_symbolLookup.empty())
+		//return;
+	std::cout
+		<< "\nCurrent Table Name: " << lexeme().getValue()
+		<< "\nCurrent Table Level: " << level()
+		<< "\nCurrent Table Size : " << size();
+		//<< "\nCurrent Table Offset: " << offset()
+		//<< "\n";
+
+	std::cout << "\nSymbol Name:\tDataType: \tOffset: \tSize: \n";
+
+	for (auto& x : _symbolLookup)
+		std::cout << x.first << "\t\t" << x.second.dataType() << "\t\t" << x.second.offset() << "\t\t" << x.second.size() << std::endl;
+}
+
+</code></pre>
+<!-- InstanceEndEditable -->
+
+</article>
+</div>
+</body>
+<!-- InstanceEnd -->
+<!-- Mirrored from hypertextbookshop.com/compilers2015/Contents/02_Portfolios/00_Team_0/1_Program/3_Symbol_Table_Code.html by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 27 Apr 2015 02:54:09 GMT -->
+</html>

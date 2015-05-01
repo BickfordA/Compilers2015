@@ -342,6 +342,7 @@ Underscore:
 
 		if (charIsDigit(next) || charIsUpperAlphabet(next) || charIsLowerAlphabet(next))
 		{
+			name += temp;
 			name += stream->get();
 			currentColumn++;
 			goto Identifier;
@@ -437,6 +438,11 @@ FixedLitTrailingInt:
 			lastGoodPosition = stream->tellg();
 			temp += stream->get(); //get the 'e'
 			goto FloatLitE;
+		}
+
+		if (charIsDigit(next)){
+			temp += stream->get();
+			goto FixedLitTrailingInt;
 		}
 
 		name += temp;

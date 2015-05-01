@@ -1,0 +1,210 @@
+<!DOCTYPE html> 
+<html><!-- InstanceBegin template="/Templates/page.dwt" codeOutsideHTMLIsLocked="false" -->
+
+<!-- Mirrored from hypertextbookshop.com/compilers2015/Contents/02_Portfolios/00_Team_0/3_Design_Pattern/design_pattern.html by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 27 Apr 2015 02:54:08 GMT -->
+<!-- Added by HTTrack --><meta http-equiv="content-type" content="text/html;charset=utf-8" /><!-- /Added by HTTrack -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<link rel="stylesheet" href="../../../../Stylesheets/prettify.css" />
+<link rel="stylesheet" href="../../../../Stylesheets/pageStylesheet.css" />
+<link rel="stylesheet" href="../../../../Stylesheets/navigationStylesheet.css" />
+<link rel="stylesheet" href="../../../../Stylesheets/allTextStyles.css" />
+<link rel="stylesheet" href="../../../../Stylesheets/colors-blue.css" />
+
+<script type="text/javascript" src="../../../../Scripts/google-code-prettify/run_prettify.js"></script>
+<script type="text/javascript" src="../../../../Scripts/recomputeAttributes.js"></script>
+
+
+<!-- InstanceBeginEditable name="doctitle" -->
+<title>Design Patterns</title>
+<!-- InstanceEndEditable -->
+</head>
+
+<body id="body-style">
+
+<!-- 
+<div id="browser-window-veil">
+</div>
+-->
+
+<div id="page-container">
+
+<header id="header">
+<div id="track-icon1">
+  <img src="../../../../Media/StyleImages/bobcat-small.png" alt="bobcat icon" width="75" height="48"></div>
+<div id="track-icon2">
+</div>
+<div id="track-icon3">
+</div>
+  <div id="headMatter">
+    <span id="headTitle1">
+      <!-- InstanceBeginEditable name="Header" -->
+        Header
+	  <!-- InstanceEndEditable --> 
+    </span>
+    <span id="headTitle2">
+    </span>
+  </div>
+</header>
+
+<nav id="navigate">
+<ul id="nav" >
+  <li><a href="../../../../default.html">Cover</a>
+  </li>
+  <li><a href="#">Contents</a>
+    <ul class="dropdownMenu">
+      <li><a href="../../../01_Introduction/1_Project_Overview/Overview_1.html">Introduction</a></li>
+      <li><a href="../0_Introduction/Cover.html">Portfolios</a></li>
+    </ul>
+  </li>
+  <li><a href="#">Portfolios</a>
+    <ul class="dropdownMenu">
+      <li><a href="../0_Introduction/Cover.html">Team 5</a></li>
+    </ul>
+  </li>
+  <li><a href="#">Team 5</a>
+    <ul class="dropdownMenu">
+      <li><a href="../0_Introduction/Cover.html">Introduction</a></li>
+      <li><a href="../1_Program/1_Scanner_Code.html">Program</a></li>
+      <li><a href="../2_Teamwork/teamwork.html">Teamwork</a></li>
+      <li><a href="design_pattern.html">Design Pattern</a></li>
+      <li><a href="../4_Technical_Writing/Technical_Writing.html">Technical Writing</a></li>
+      <li><a href="../5_UML/1_Symbol_Table.html">UML</a></li>
+      <li><a href="../6_Design_Tradeoffs/Deesign_Tradeoffs.html">Design Tradeoffs</a></li>
+      <li><a href="../7_Life_Cycle/Life_Cycle.html">Life Cycle</a></li>
+    </ul>
+  </li>
+  <li><a href="#">Design Pattern</a>
+    <ul class="dropdownMenu">
+      <li><a href="design_pattern.html">design pattern </a></li>
+    </ul>
+  </li>
+  <li><a href="../../../../help.html" target="_blank">Help</a>
+  </li>
+</ul>
+</nav>
+
+
+<aside id="aside-left">
+<div id="asideLeftTitle">
+Compilers 2014
+</div>
+
+</aside>
+
+<aside id="aside-right">
+</aside>
+
+<footer id="footer">
+  <div id="footMatter">
+    <span id="previousPageLink">
+    </span>
+    <span id="currentPageNumber">
+      Page 1 of 1
+    </span>
+    <span id="nextPageLink">
+    </span>
+  </div>
+</footer>
+
+<article id="mainContent">
+<!-- InstanceBeginEditable name="Main" -->
+<h1>Design Pattern</h1>
+<!--
+Identify one design pattern that was used in your capstone project and describe exactly where in the code it is located. Highlight the design pattern in yellow. Explain why you used the pattern and didn’t just code directly
+-->
+
+<h2>Design Patterns in the Compilers Course</h2>
+<p>The components of the compiler&#8212;the scanner, parser, symbol table, and semantic analyzer&#8212;were each by way of a specific pattern that students were asked to follow. In some cases, students were allowed to deviate from the patterns. As a result, some students may have chosen a different formal design pattern for portions of the compiler. If so, they appear below.</p>
+<h2>Specific Design Patterns</h2>
+<p>
+Inheritance was used in the Semantic Analyser to represent the different types of operands that could be passed into machine instruction expressions.  The base class for this inheritance scheme was <i>Operand</i>.It was extended by classes <i>Stack Operand</i>, <i>LexemeOperand</i>, and <i>Command Operand</i>. This allowed for polymorphic operands to be stored as pointers in the semantic records so that commands could be passed different operand types in the same semantic record.
+</p>
+
+<pre class="prettyprint" ><code class="language-c++">
+
+class Operand
+{
+
+protected:
+  Operand(LexemeResources::DataType _dataType);
+  
+public:
+  Operand();
+  virtual ~Operand(){;}
+  virtual bool onTopOfStack();
+  virtual std::string getName();
+  std::string address();
+  LexemeResources::DataType type();
+  void setType(LexemeResources::DataType);
+
+protected:
+
+  LexemeResources::DataType _dataType;
+  std::string _address;
+};
+
+class StackOperand : public Operand
+{
+public:
+  StackOperand(LexemeResources::DataType type);
+
+  bool onTopOfStack();
+
+};
+
+class LexemeOperand : public Operand
+{
+public:
+  LexemeOperand(const Lexeme lexeme, LexemeResources::DataType type);
+
+  std::string getName();
+
+  Lexeme getLexeme() const;
+
+protected:
+  const Lexeme _lexeme; 
+
+};
+
+class CommandOperand : public Operand
+{
+public:
+  CommandOperand(std::string command, LexemeResources::DataType type = LexemeResources::UnknownData);
+
+  std::string getCommand() const;
+protected:
+
+  const std::string _command;
+};
+
+</code></pre>
+
+<p>
+A Facade pattern was used for the parser. This simplified the interface that the controling program had to interact with, while the <i>Parser</i> class was just a facade for the underlying <i>Grammer</i> class which held the functions used for determining the semantic correctness of the token stream. 
+</p>
+
+<pre class="prettyprint" ><code class="language-c++">
+public class Table {
+
+	private Table(Table parent) {
+		this.parent = parent;
+	}
+	
+	public static Table rootInstance() {
+		return root;
+	}
+	
+	<span class="nocode">...</span>
+	
+}
+</code></pre>
+<!-- InstanceEndEditable -->
+
+</article>
+</div>
+</body>
+<!-- InstanceEnd -->
+<!-- Mirrored from hypertextbookshop.com/compilers2015/Contents/02_Portfolios/00_Team_0/3_Design_Pattern/design_pattern.html by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 27 Apr 2015 02:54:08 GMT -->
+</html>

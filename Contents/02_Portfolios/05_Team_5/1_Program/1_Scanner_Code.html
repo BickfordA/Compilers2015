@@ -1,0 +1,200 @@
+<!DOCTYPE html> 
+<html><!-- InstanceBegin template="/Templates/page.dwt" codeOutsideHTMLIsLocked="false" -->
+
+<!-- Mirrored from hypertextbookshop.com/compilers2015/Contents/02_Portfolios/05_Team_5/1_Program/1_Scanner_Code.html by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 27 Apr 2015 02:54:08 GMT -->
+<!-- Added by HTTrack --><meta http-equiv="content-type" content="text/html;charset=utf-8" /><!-- /Added by HTTrack -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<link rel="stylesheet" href="../../../../Stylesheets/prettify.css" />
+<link rel="stylesheet" href="../../../../Stylesheets/pageStylesheet.css" />
+<link rel="stylesheet" href="../../../../Stylesheets/navigationStylesheet.css" />
+<link rel="stylesheet" href="../../../../Stylesheets/allTextStyles.css" />
+<link rel="stylesheet" href="../../../../Stylesheets/colors-blue.css" />
+
+<script type="text/javascript" src="../../../../Scripts/google-code-prettify/run_prettify.js"></script>
+<script type="text/javascript" src="../../../../Scripts/recomputeAttributes.js"></script>
+
+
+<!-- InstanceBeginEditable name="doctitle" -->
+<title>Scanner</title>
+<!-- InstanceEndEditable -->
+</head>
+
+<body id="body-style">
+
+<!-- 
+<div id="browser-window-veil">
+</div>
+-->
+
+<div id="page-container">
+
+<header id="header">
+<div id="track-icon1">
+  <img src="../../../../Media/StyleImages/bobcat-small.png" alt="bobcat icon" width="75" height="48"></div>
+<div id="track-icon2">
+</div>
+<div id="track-icon3">
+</div>
+  <div id="headMatter">
+    <span id="headTitle1">
+      <!-- InstanceBeginEditable name="Header" -->
+        Team 5
+	  <!-- InstanceEndEditable --> 
+    </span>
+    <span id="headTitle2">
+    </span>
+  </div>
+</header>
+
+<nav id="navigate">
+<ul id="nav" >
+  <li><a href="../../../../default.html">Cover</a>
+  </li>
+  <li><a href="#">Contents</a>
+    <ul class="dropdownMenu">
+      <li><a href="../../../01_Introduction/1_Project_Overview/Overview_1.html">Introduction</a></li>
+      <li><a href="../0_Introduction/Cover.html">Portfolios</a></li>
+    </ul>
+  </li>
+  <li><a href="#">Portfolios</a>
+    <ul class="dropdownMenu">
+      <li><a href="../0_Introduction/Cover.html">Team 5</a></li>
+    </ul>
+  </li>
+  <li><a href="#">Team 5</a>
+    <ul class="dropdownMenu">
+      <li><a href="../0_Introduction/Cover.html">Introduction</a></li>
+      <li><a href="1_Scanner_Code.html">Program</a></li>
+      <li><a href="../2_Teamwork/teamwork.html">Teamwork</a></li>
+      <li><a href="../3_Design_Pattern/design_pattern.html">Design Pattern</a></li>
+      <li><a href="../4_Technical_Writing/Technical_Writing.html">Technical Writing</a></li>
+      <li><a href="../5_UML/1_Symbol_Table.html">UML</a></li>
+      <li><a href="../6_Design_Tradeoffs/Deesign_Tradeoffs.html">Design Tradeoffs</a></li>
+      <li><a href="../7_Life_Cycle/Life_Cycle.html">Life Cycle</a></li>
+    </ul>
+  </li>
+  <li><a href="#">Program</a>
+    <ul class="dropdownMenu">
+      <li><a href="1_Scanner_Code.html">Scanner Code </a></li>
+      <li><a href="2_Parser_Code.html">Parser Code </a></li>
+      <li><a href="3_Symbol_Table_Code.html">Symbol Table Code </a></li>
+      <li><a href="4_Semantic_Analyzer_Code.html">Semantic Analyzer Code </a></li>
+    </ul>
+  </li>
+  <li><a href="../../../../help.html" target="_blank">Help</a>
+  </li>
+</ul>
+</nav>
+
+
+<aside id="aside-left">
+<div id="asideLeftTitle">
+Compilers 2014
+</div>
+
+</aside>
+
+<aside id="aside-right">
+</aside>
+
+<footer id="footer">
+  <div id="footMatter">
+    <span id="previousPageLink">
+    </span>
+    <span id="currentPageNumber">
+      Page 1 of 4
+    </span>
+    <span id="nextPageLink">
+      <a href="2_Parser_Code.html">Next ></a>
+    </span>
+  </div>
+</footer>
+
+<article id="mainContent">
+<!-- InstanceBeginEditable name="Main" -->
+<h1>Scanner</h1>
+
+<h2>Specifications</h2>
+<pre class="prettyprint"><code class="language-java">
+CMakeLists.txt 
+FiniteStateAutomaton.cpp:Check the type of token 
+FiniteStateAutomaton.h 
+Lexeme.cpp:Get type and value from lexeme 
+Lexeme.h 
+Resources.h:Contain all resources we used in program(LexemeResources LexemeType and so on) 
+Scanner.cpp:The main part of Scanner 
+Scanner.h 
+Token.cpp:Operating of token (get number/lexeme and so on) 
+Token.h      
+TokenStream.cpp:build token file for parser     
+TokenStream.h 
+
+1.Use Scanner.cpp read token from file one by one. 
+2.Scan token use  Scanner::scanNextToken() 
+3.In Scanner::scanNextToken() use FiniteStateAutomaton.cpp  to check the type of token then return token  if it is correct, or return error.
+4. Use TokenStream.cpp to build a token file for parser 
+</code></pre>
+
+<h2>Source Listing</h2>
+
+<pre class="prettyprint"><code class="language-java">
+Some example of scanner
+
+Token Scanner::getNextToken()
+{
+	Token next;
+
+	do{
+		//skip all whitespace 
+		next = scanNextToken();
+	} while (next.getLexeme().getType() == MP_WHITESPACE);
+
+	//only need to check identifiers
+	//to see if they are reserved words
+	if (next.getLexeme().getType() == MP_IDENTIFIER)
+		checkReserved(next);
+
+	return next;
+}
+
+Token FiniteStateAutomaton::singleCharFSA(istream* stream, char c, LexemeType type, int& line, int& currentColumn)
+{
+	int column = currentColumn;
+	char next;
+	string name;
+
+	//Start State
+	{
+		next = stream->peek();
+
+		if (next == c){
+			name += stream->get();
+			currentColumn++;
+			goto Accept;
+		}
+
+		goto Reject;
+	}
+
+Accept:
+	{
+		return Token(type, name, line, column);
+	}
+
+Reject:
+	{
+		return Token();
+	}
+}
+</code></pre>
+
+<!-- InstanceEndEditable -->
+
+</article>
+</div>
+</body>
+<!-- InstanceEnd -->
+<!-- Mirrored from hypertextbookshop.com/compilers2015/Contents/02_Portfolios/00_Team_0/1_Program/1_Scanner_Code.html by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 27 Apr 2015 02:54:08 GMT -->
+</html>

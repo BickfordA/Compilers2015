@@ -1,0 +1,252 @@
+<!DOCTYPE html> 
+<html><!-- InstanceBegin template="/Templates/page.dwt" codeOutsideHTMLIsLocked="false" -->
+
+<!-- Mirrored from hypertextbookshop.com/compilers2015/Contents/02_Portfolios/00_Team_0/1_Program/4_Semantic_Analyzer_Code.html by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 27 Apr 2015 02:54:09 GMT -->
+<!-- Added by HTTrack --><meta http-equiv="content-type" content="text/html;charset=utf-8" /><!-- /Added by HTTrack -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<link rel="stylesheet" href="../../../../Stylesheets/prettify.css" />
+<link rel="stylesheet" href="../../../../Stylesheets/pageStylesheet.css" />
+<link rel="stylesheet" href="../../../../Stylesheets/navigationStylesheet.css" />
+<link rel="stylesheet" href="../../../../Stylesheets/allTextStyles.css" />
+<link rel="stylesheet" href="../../../../Stylesheets/colors-blue.css" />
+
+<script type="text/javascript" src="../../../../Scripts/google-code-prettify/run_prettify.js"></script>
+<script type="text/javascript" src="../../../../Scripts/recomputeAttributes.js"></script>
+
+
+<!-- InstanceBeginEditable name="doctitle" -->
+<title>Sematic Analyzer</title>
+<!-- InstanceEndEditable -->
+</head>
+
+<body id="body-style">
+
+<!-- 
+<div id="browser-window-veil">
+</div>
+-->
+
+<div id="page-container">
+
+<header id="header">
+<div id="track-icon1">
+  <img src="../../../../Media/StyleImages/bobcat-small.png" alt="bobcat icon" width="75" height="48"></div>
+<div id="track-icon2">
+</div>
+<div id="track-icon3">
+</div>
+  <div id="headMatter">
+    <span id="headTitle1">
+      <!-- InstanceBeginEditable name="Header" -->
+        Team 5
+	  <!-- InstanceEndEditable --> 
+    </span>
+    <span id="headTitle2">
+    </span>
+  </div>
+</header>
+
+<nav id="navigate">
+<ul id="nav" >
+  <li><a href="../../../../default.html">Cover</a>
+  </li>
+  <li><a href="#">Contents</a>
+    <ul class="dropdownMenu">
+      <li><a href="../../../01_Introduction/1_Project_Overview/Overview_1.html">Introduction</a></li>
+      <li><a href="../0_Introduction/Cover.html">Portfolios</a></li>
+    </ul>
+  </li>
+  <li><a href="#">Portfolios</a>
+    <ul class="dropdownMenu">
+      <li><a href="../0_Introduction/Cover.html">Team 5</a></li>
+    </ul>
+  </li>
+  <li><a href="#">Team 5</a>
+    <ul class="dropdownMenu">
+      <li><a href="../0_Introduction/Cover.html">Introduction</a></li>
+      <li><a href="1_Scanner_Code.html">Program</a></li>
+      <li><a href="../2_Teamwork/teamwork.html">Teamwork</a></li>
+      <li><a href="../3_Design_Pattern/design_pattern.html">Design Pattern</a></li>
+      <li><a href="../4_Technical_Writing/Technical_Writing.html">Technical Writing</a></li>
+      <li><a href="../5_UML/1_Symbol_Table.html">UML</a></li>
+      <li><a href="../6_Design_Tradeoffs/Deesign_Tradeoffs.html">Design Tradeoffs</a></li>
+      <li><a href="../7_Life_Cycle/Life_Cycle.html">Life Cycle</a></li>
+    </ul>
+  </li>
+  <li><a href="#">Program</a>
+    <ul class="dropdownMenu">
+      <li><a href="1_Scanner_Code.html">Scanner Code </a></li>
+      <li><a href="2_Parser_Code.html">Parser Code </a></li>
+      <li><a href="3_Symbol_Table_Code.html">Symbol Table Code </a></li>
+      <li><a href="4_Semantic_Analyzer_Code.html">Semantic Analyzer Code </a></li>
+    </ul>
+  </li>
+  <li><a href="../../../../help.html" target="_blank">Help</a>
+  </li>
+</ul>
+</nav>
+
+
+<aside id="aside-left">
+<div id="asideLeftTitle">
+Compilers 2014
+</div>
+
+</aside>
+
+<aside id="aside-right">
+</aside>
+
+<footer id="footer">
+  <div id="footMatter">
+    <span id="previousPageLink">
+<a href="3_Symbol_Table_Code.html">< Previous</a>
+    </span>
+    <span id="currentPageNumber">
+      Page 4 of 4
+    </span>
+    <span id="nextPageLink">
+    </span>
+  </div>
+</footer>
+
+<article id="mainContent">
+<!-- InstanceBeginEditable name="Main" -->
+<h1>Semantic Analyzer</h1>
+
+<h2>Specifications</h2>
+<pre class="prettyprint" ><code class="language-java">	
+SemanticAnalyzer.cpp:SemanticAnalyzer  	
+SemanticAnalyzer.h 	
+
+SemanticRecord.cpp:Operating of SymbolRecord  	
+SemanticRecord.h 	
+
+</code></pre>
+
+<h2>Source Listing</h2>
+
+<pre class="prettyprint" ><code class="language-java">
+Some example of SemanticAnalyzer code
+
+bool SemanticAnalyser::insertSymbol(SemanticRecord& record)
+{
+	while (record.size() > 0 )
+	{
+		if (record.showNextOperandAs<LexemeOperand>()){
+			LexemeOperand* nextOp = record.showNextOperandAs<LexemeOperand>();
+			assert(nextOp);
+			insertSymbol(nextOp->getLexeme(), nextOp->type());
+		}
+		else{
+			assert(false);
+			return false;
+		}
+		delete record.getNextOperandPointer();
+	}
+	return true;
+}
+
+void SemanticAnalyser::whileStatementPostbody(int repeatLabel, int exitLabel)
+{
+	_outFile << "BR L" << repeatLabel << " \n";
+	_outFile << "L" << exitLabel << ":\n";
+
+	if (ENABLE_DEBUGGING)
+		_outFile << "; end 'while' loop \n\n";
+}
+
+
+void SemanticAnalyser::forBegin(int& beginCondition,int& exitLoop, SemanticRecord& controlVars)
+{
+	//we need to allocate the space for the variables
+	
+	LexemeOperand lexOp1 = controlVars.getNextOperandAsLexeme();
+	MachineVal initVal = generateMachineValue(lexOp1.getLexeme());
+
+	//we dont use this for anything because this is on top of the stack
+	Operand lexOp2 = controlVars.getNextOperand();
+	//MachineVal assignedVal = generateMachineValue(lexOp2.getLexeme());
+
+	LexemeOperand lexOp3 = controlVars.getNextOperandAsLexeme();
+	MachineVal stepVal = generateMachineValue(lexOp3.getLexeme());
+	//this should be a -1 or 1 depending on if
+	//we are going up or down. 
+
+	//this is on the stack as well so no neet to use it
+	Operand lexOp4 = controlVars.getNextOperand();
+	//MachineVal finalVal = generateMachineValue(lexOp4.getLexeme());
+
+	controlVars.addOperand(new LexemeOperand( lexOp1));
+
+	if (ENABLE_DEBUGGING)
+		_outFile << "\n;         Begin 'for' loop\n";
+
+	//int level = _currentTable->level() ;
+	//
+	//the intial value is on the stack and will be located at -1 offset current level
+	_outFile << "PUSH " << initVal.value << " \n"; //for current value
+
+	//set SP for offset into control vars
+	//_outFile << "MOV SP D" << to_string(level) << " \n";
+
+
+	//_outFile << "PUSH " << initVal.value << " \n";
+
+	//change the loop variable to its assignment
+	//_outFile << "PUSH " << "-3(D" << level << ") \n";
+	_outFile << "PUSH " << "-3(SP) \n"; //one 
+	_outFile << "POP " << initVal.value << " \n"; //zero
+
+	//////////////////////////////////////
+	////////////initialized
+	//////////////////////////////////////
+
+	//skip loop increment the first time
+	int skipIncrement = getNextLabelVal();
+	_outFile << "BR L" << skipIncrement << "\n";
+
+	//begin the the condition check
+	beginCondition = getNextLabelVal();
+	_outFile << "L" << beginCondition << ": \n";
+
+	//update the loop variable
+	_outFile << "PUSH " << stepVal.value << " \n"; //one 
+	_outFile << "PUSH " << initVal.value << " \n"; //one two
+	_outFile << "ADDS " << " \n"; //one
+	_outFile << "POP " << "-3(SP) \n";// -3  // zero
+	_outFile << "PUSH " << "-3(SP) \n";//one
+	_outFile << "POP " << initVal.value << " \n";//zero
+	//loop variable updated
+
+	_outFile << "L" << skipIncrement << ": \n";
+
+	//check against limit
+	_outFile << "PUSH " << "-3(SP) \n"; //one
+	_outFile << "PUSH " << "-3(SP) \n"; //two
+	//limit checked
+
+	string compare = stepVal.value == "#-1" ? "CMPGES" : "CMPLES";
+	_outFile << compare << "\n";
+
+	exitLoop = getNextLabelVal();
+	_outFile << "BRFS L" << to_string(exitLoop) << " \n";
+
+
+	//if the step is negative we continue if greater than the condition
+	//otherwise we want to continue if the value is less than the condition
+
+}
+
+</code></pre>
+
+<!-- InstanceEndEditable -->
+
+</article>
+</div>
+</body>
+<!-- InstanceEnd -->
+<!-- Mirrored from hypertextbookshop.com/compilers2015/Contents/02_Portfolios/00_Team_0/1_Program/4_Semantic_Analyzer_Code.html by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 27 Apr 2015 02:54:09 GMT -->
+</html>

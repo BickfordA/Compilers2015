@@ -1,0 +1,69 @@
+BR L0
+L1:
+BR L2
+L2:
+MOV SP D1
+PUSH SP
+PUSH #2
+ADDS
+POP SP
+;		Pushing: 2 Type:0
+PUSH #2 
+POP 0(D1) 
+;		Pushing: 2 Type:0
+PUSH #2 
+POP 1(D1) 
+L3:
+BR L4
+L4:
+MOV SP D1
+PUSH SP
+PUSH #3
+ADDS
+POP SP
+;		Pushing: x Type:5
+PUSH @-3(D1) 
+;		Pushing: y Type:5
+PUSH @-2(D1) 
+ADDS
+POP 0(D1) 
+MOV D1 SP
+MOV 0(SP) -3(SP)
+MOV -1(SP) -2(SP)
+PUSH SP
+PUSH #1
+ADDS
+PUSH #2
+SUBS
+PRTS
+PRTR
+POP SP
+PRTS
+PRTR
+RET
+L0:
+MOV SP D0
+PUSH SP
+PUSH #5
+ADDS
+POP SP
+;		Pushing: 1 Type:0
+PUSH #1 
+POP 0(D0) 
+;		Pushing: 1 Type:0
+PUSH #1 
+POP 1(D0) 
+PUSH D0
+PUSH #0
+ADDS
+PUSH D0
+PUSH #1
+ADDS
+CALL L3
+POP 2(D0) 
+;		Pushing: z Type:0
+PUSH 2(D0) 
+WRTS
+WRTLN #""
+MOV D0 SP 
+HLT 

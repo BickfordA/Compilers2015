@@ -21,6 +21,7 @@ public:
 	LexemeResources::DataType type();
 	void setType(LexemeResources::DataType);
 
+
 protected:
 
 	LexemeResources::DataType _dataType;
@@ -52,6 +53,7 @@ public:
 	std::string getName();
 
 	Lexeme getLexeme() const;
+
 protected:
 	const Lexeme _lexeme; 
 

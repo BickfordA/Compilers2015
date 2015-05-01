@@ -26,9 +26,22 @@ public:
 	void setOffset(int offset);
 
 	std::list<LexemeResources::DataType> argumentTypes() const;
+	void setArgumentTypes(std::list<LexemeResources::DataType> newArguments);
+
+
+	void setLabel(int label);
+	int label() const;
+
+	void setProd(bool isProd);
+	void setFun(bool isFun);
+	bool funProd();
+	bool function();
 
 protected:
+	bool _isFun;
+	bool _isProc;
 
+	int _label;
 
 	Lexeme _lexeme;
 	LexemeResources::DataType _dataType;

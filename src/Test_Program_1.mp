@@ -99,8 +99,8 @@ program lab1;
 		listNum(100 div 2);
 		listNum(factorial(9 div 3));
 		
-		otherthing := 5 mod 2;
-		writeln(-otherthing);
+		otherThing := 5 mod 2;
+		writeln(-otherThing);
 		
 		
 		bob := true;
@@ -116,10 +116,10 @@ program lab1;
 		
 		writeln(-(1 + 2));
 		
-		otherthing := 15 * 15 div 5 + 1 - 2 * 2;
-		writeln('From *main* otherthing is: ', otherthing);
+		otherThing := 15 * 15 div 5 + 1 - 2 * 2;
+		writeln('From *main* otherThing is: ', otherThing);
 		scopeTest;
-		writeln('From *main* otherthing still is: ', otherthing);
+		writeln('From *main* otherThing still is: ', otherThing);
 		floatMathTest := (7.0 *2.1 - 0.6 / 13) * (factorial(13 - 11));
 		writeln(floatMathTest);
 		
@@ -128,9 +128,9 @@ program lab1;
 		
 		writeln(retString(0.001, 1.23, 'String as input argument'));
 		
-		writeln('X starts at ', otherthing);
-		refCheck(otherthing);
-		writeln('X is now ', otherthing, ' in main');
+		writeln('X starts at ', otherThing);
+		refCheck(otherThing);
+		writeln('X is now ', otherThing, ' in main');
 		
 		writeln('floatMathTest start: ', floatMathTest);
 		
@@ -138,17 +138,17 @@ program lab1;
 		
 		writeln('floatMathTest is now ', floatMathTest, ' in main');
 		
-		otherthing := 5;
+		otherThing := 5;
 		repeat
 			begin
-			write(otherthing, ' ');
-			otherthing := otherthing - 3;
+			write(otherThing, ' ');
+			otherThing := otherThing - 3;
 			end;
-		until (otherthing < 0);
+		until (otherThing < 0);
 		
-		for otherthing := (-5) to (otherthing + 20) do
+		for otherThing := (-5) to (otherThing + 20) do
 		
-			writeln('otherthing is ', otherthing);
+			writeln('otherThing is ', otherThing);
 		
 		booleanValue := true;
 		

@@ -2,7 +2,7 @@
 
 //use this to turn on and off comments in the 
 //written uMahine code
-#define ENABLE_DEBUGGING true
+#define ENABLE_DEBUGGING false
 
 #include <assert.h>
 
@@ -44,23 +44,23 @@ bool SemanticAnalyser::createTable(const Lexeme lexeme, DataType type)
 	bool found = false;
 	const Symbol match = _currentTable->lookup(lexeme.getValue(), found);
 
-	if (found && 
-		(match.lexeme().getValue() != "while" || 
-		 match.lexeme().getValue() != "for" ||
-		 match.lexeme().getValue() != "if" || match.lexeme().getValue() != "repeat"))
-
+	if (found)
 	{//there is already an entry with this name
 		symbolCollisionError(Token(lexeme, -1, -1));
 		return false;
 	}
 
+	int nextLabel = getNextLabelVal();
+	writeCommand("L" + to_string(nextLabel) + ":");
 	_currentTable = _currentTable->createTable(lexeme, type);
+	_currentTable->setLabel(nextLabel);
 	return true;
 }
 
 void SemanticAnalyser::closeTable(bool deleteEntry)
 {
-	SymbolTable* parent = _currentTable->closeTable();
+
+	SymbolTable* parent = _currentTable->closeTable(_currentTable->label());
 	if (parent){
 		_currentTable = parent;
 		return;
@@ -71,52 +71,21 @@ void SemanticAnalyser::closeTable(bool deleteEntry)
 	}
 }
 
-//bool SemanticAnalyser::insertSymbol(const Token token)
-//{
-//	DataType type = UnknownData;
-//
-//	switch (token.getLexeme().getType())
-//	{
-//	case MP_INTEGER:
-//		type = IntData;
-//		break;
-//	case MP_FLOAT:
-//		type = FloatData;
-//		break;
-//	case MP_STRING:
-//		type = StringData;
-//	default:
-//		type = UnknownData;
-//	}
-//
-//	//i think we may need to set the type manually for functions/procedures....
-//	//i am not sure how we will get the reurn type
-//
-//	return insertSymbol(token, type);
-//}
-//
-////bool SemanticAnalyser::insertSymbol(const Token token, DataType type)
-//{
-//	if (!_currentTable){
-//		assert(false);
-//		return false;//this should not happend;
-//	}
-//
-//	bool found;
-//	const Symbol foundSymbol = _currentTable->lookup(token.getLexeme().getValue(), found);
-//
-//	if (found){
-//		symbolCollisionError(token);
-//		return false;
-//	}
-//
-//	_currentTable->insert(token.getLexeme(), type);
-//	return true;
-//}
+
+void SemanticAnalyser::setTableAsFunction()
+{
+	_currentTable->setFun(true);
+}
+
+void SemanticAnalyser::setTableAsProcedure()
+{
+	_currentTable->setProd(true);
+}
 
 bool SemanticAnalyser::insertSymbol(const Lexeme lex, DataType type)
 {
 	if (!_currentTable){
+		throw SemanticAnaylserException("Symbol table is not intialized");
 		assert(false);
 		return false;//this should not happend;
 	}
@@ -136,12 +105,13 @@ bool SemanticAnalyser::insertSymbol(const Lexeme lex, DataType type)
 bool SemanticAnalyser::insertArgument(const Lexeme lex, const int offset, const DataType type)
 {
 	if (!_currentTable){
+		throw SemanticAnaylserException("Symbol table is not intialized");
 		assert(false);
 		return false;//this should not happend;
 	}
 
 	bool found;
-	const Symbol foundSymbol = _currentTable->lookup(lex.getValue(), found);
+	const Symbol foundSymbol = _currentTable->lookUpAtLevel(lex.getValue(), found);
 
 
 	if (found){
@@ -156,15 +126,18 @@ bool SemanticAnalyser::insertArgument(const Lexeme lex, const int offset, const 
 
 bool SemanticAnalyser::insertSymbol(SemanticRecord& record)
 {
-	for (int i = 0; i < record.size(); i++)
+	while (record.size() > 0 )
 	{
 		if (record.showNextOperandAs<LexemeOperand>()){
 			LexemeOperand* nextOp = record.showNextOperandAs<LexemeOperand>();
-			assert(nextOp);
+			
+			if (!(nextOp))
+				throw SemanticAnaylserException("Trying to insert invalid symbol");
+
 			insertSymbol(nextOp->getLexeme(), nextOp->type());
 		}
 		else{
-			assert(false);
+			throw SemanticAnaylserException("Trying to insert invalid type.");
 			return false;
 		}
 		delete record.getNextOperandPointer();
@@ -172,27 +145,10 @@ bool SemanticAnalyser::insertSymbol(SemanticRecord& record)
 	return true;
 }
 
-//bool SemanticAnalyser::insertArgument(SemanticRecord& record)
-//{
-//	for (int i = 0; i < record.size(); i++)
-//	{
-//		if (record.showNextOperandAs<LexemeOperand>()){
-//			LexemeOperand* nextOp = record.showNextOperandAs<LexemeOperand>();
-//			assert(nextOp);
-//			insertSymbol(nextOp->getLexeme(), nextOp->type());
-//		}
-//		else{
-//			assert(false);
-//			return false;
-//		}
-//		delete record.getNextOperandPointer();
-//	}
-//	return true;
-//}
-
 const Symbol SemanticAnalyser::lookupSymbol(string name, bool& found)
 {
 	if (!_currentTable){
+		throw SemanticAnaylserException("Table is not initialized");
 		assert(false);
 		found = false;
 		return Symbol();
@@ -215,6 +171,16 @@ string SemanticAnalyser::lookupSymbolAddress(string name, bool& found, DataType&
 	string addressString(address);
 
 	return addressString;
+}
+
+string SemanticAnalyser::errorMsg()
+{
+	string error;
+
+	for (string err : _errList){
+		error += err + "\n";
+	}
+	return error;
 }
 
 string SemanticAnalyser::stringLitToVal(string value)
@@ -272,15 +238,16 @@ MachineVal SemanticAnalyser::generateMachineValue(Lexeme lex)
 		machineVal = intLitToVal(lex.getValue());
 		break;
 	case MP_FLOAT_LIT:
+	case MP_FIXED_LIT:
 		type = FloatData;
 		machineVal = floatLitToVal(lex.getValue());
 		break;
     case MP_TRUE:
-        type = BoolData;
+        type = IntData;//there isnt a bool type in uMachine
         machineVal = "#1";
         break;
     case MP_FALSE:
-        type = BoolData;
+        type = IntData;
         machineVal = "#0";
         break;
 	case MP_TO:
@@ -292,6 +259,7 @@ MachineVal SemanticAnalyser::generateMachineValue(Lexeme lex)
 		machineVal = "#-1";
 		break;
 	default:
+		throw SemanticAnaylserException("Trying to generate value for invalid type!!!.");
 		assert(false);
 		//this shouldnt happen
 		//but i may have missed some
@@ -314,6 +282,8 @@ void SemanticAnalyser::symbolCollisionError(const Token token)
 {
 	string err = "This variable has already been used: " + token.getLexeme().getValue() + " \nline:" + to_string(token.getLineNumber()) + " \ncol:" + to_string(token.getColumnNumber()) + "!!.\n";
 	_errList.push_back(err);
+	throw SemanticAnaylserException(err);
+	assert(false);
 }
 
 void SemanticAnalyser::printCurrentTable()
@@ -352,7 +322,7 @@ void SemanticAnalyser::ifStatementElse(int currentLabel, int&nextLabel)
 {
 	//end of true section jump to the end 
 	nextLabel = getNextLabelVal();
-	_outFile << "L" << nextLabel << ":\n";
+	_outFile << "BR L" << nextLabel << "\n";
 
 
 	//the if was false start here 
@@ -414,7 +384,7 @@ void SemanticAnalyser::writeList(SemanticRecord& writeSymbols, bool writeLn)
 void SemanticAnalyser::repeatBegin(int& beginLabel)
 {
 	beginLabel = getNextLabelVal();
-	_outFile << "L:" << beginLabel << "\n";
+	_outFile << "L" << beginLabel << ":\n";
 }
 
 void SemanticAnalyser::repeatExit(int repeatLabel)
@@ -422,7 +392,7 @@ void SemanticAnalyser::repeatExit(int repeatLabel)
 	//repeat condition will leave false on the stack if it fails
 	//and we will continue
 
-	_outFile << "BRTS L" << repeatLabel << "\n";
+	_outFile << "BRFS L" << repeatLabel << "\n";
 }
 
 void SemanticAnalyser::forBegin(int& beginCondition,int& exitLoop, SemanticRecord& controlVars)
@@ -536,64 +506,54 @@ void SemanticAnalyser::forEndBody(int loopAgain, int exitLoop, SemanticRecord& i
 
 }
 
-void SemanticAnalyser::funProdCall(SemanticRecord& id, SemanticRecord& args)
+list<DataType> SemanticAnalyser::arguments(LexemeOperand lexop)
+{
+	bool ok = false;
+	const Symbol funSymbol = lookupSymbol(lexop.getName(), ok);
+
+	list<DataType> argTypes = funSymbol.argumentTypes();
+	return argTypes;
+}
+
+void SemanticAnalyser::prodCall(SemanticRecord& id, SemanticRecord& args)
 {
 	//look up the function
 
 	LexemeOperand* fun = id.showNextOperandAs<LexemeOperand>();
-	assert(fun);
+	if (!(fun))
+		throw SemanticAnaylserException("Procedure call for invalid type");
 	bool ok = false;
-	const Symbol funSymbol = _currentTable->lookup(fun->getName(), ok);
+	const Symbol funSymbol = lookupSymbol(fun->getName(), ok);
 
 	list<DataType> argTypes = funSymbol.argumentTypes();
 
+	writeCommand("CALL L" + to_string(funSymbol.label()));
+}
 
-	while (args.size() > 0){
-		if (argTypes.size() == 0){
-			//error out with "Incorrect number of arguments"
-			assert(false);
-			break;
-		}
-		DataType nextArgType = argTypes.front();
-		argTypes.pop_front();
+Operand* SemanticAnalyser::funCall(SemanticRecord& id, SemanticRecord& args)
+{
+	prodCall(id, args);
 
-		if (args.showNextOperandAs<LexemeOperand>()){
-			LexemeOperand nextArg = args.getNextOperandAsLexeme();
-			if (DataIsAddress(nextArgType)){
-				//then we need to push the address of the value 
-				//on to the stack
-				bool ok;
-				DataType outType;
-				string addr = lookupSymbolAddress(nextArg.getName(), ok, outType);
+	LexemeOperand* fun = id.showNextOperandAs<LexemeOperand>();
+	if(!(fun))
+		throw SemanticAnaylserException("Fun call for invalid type");
 
-				if (!ok){
-					assert(false);
-					//argument not found
-				}
-				if (outType != DataAsReferenceType(nextArgType)){
-					assert(false);
-					//incorrect argument type
-				}
-				writeCommand("PUSH D"+ nextArg.getLevel())
+	bool ok = false;
+	const Symbol funSymbol = lookupSymbol(fun->getName(), ok);
 
 
-			}
-			else{
-				//just push the value its self
-
-			}
-		}
-		else{
-			//they should all have lexemes so we can lok them up
-			assert(false);
-		}
-	}
+	return new StackOperand(funSymbol.dataType());
 }
 
 void SemanticAnalyser::insertArguments(SemanticRecord& inputRecord)
 {
 	int offset = inputRecord.size();
 	offset++; //for the program counter
+	if (_currentTable->function()){
+		//take one more for the return value
+		offset++;
+	}
+	offset = offset + 10; //for register copy 
 	offset = offset* (-1);//moving backwards from SP at time of call
 
 	while (inputRecord.size()){
@@ -615,6 +575,20 @@ void SemanticAnalyser::generateActivationRecord(int beginRecord)
 
 	writeCommand("L" + to_string(beginRecord) + ":");
 
+	if (_currentTable->funProd()){
+		//save all of the registers 
+		writeCommand("PUSH D0");
+		writeCommand("PUSH D1");
+		writeCommand("PUSH D2");
+		writeCommand("PUSH D3");
+		writeCommand("PUSH D4");
+		writeCommand("PUSH D5");
+		writeCommand("PUSH D6");
+		writeCommand("PUSH D7");
+		writeCommand("PUSH D8");
+		writeCommand("PUSH D9");
+	}
+
 	int level = _currentTable->level();
 
 	writeCommand("MOV SP D" + to_string(level));
@@ -622,11 +596,29 @@ void SemanticAnalyser::generateActivationRecord(int beginRecord)
 	writeCommand("PUSH #" + to_string(memAlloc));
 	writeCommand("ADDS");
 	writeCommand("POP SP");
+
+
+
+}
+
+void SemanticAnalyser::restoreRegisterState()
+{
+	writeCommand("POP D9");
+	writeCommand("POP D8");
+	writeCommand("POP D7");
+	writeCommand("POP D6");
+	writeCommand("POP D5");
+	writeCommand("POP D4");
+	writeCommand("POP D3");
+	writeCommand("POP D2");
+	writeCommand("POP D1");
+	writeCommand("POP D0");
 }
 
 void SemanticAnalyser::functionHeading(int& beginLabel)
 {
 	beginLabel = getNextLabelVal();
+	writeCommand("PUSH #\"Yahoo\"");
 	writeCommand("BR L" + to_string(beginLabel));
 }
 
@@ -636,26 +628,37 @@ void SemanticAnalyser::functionEnd()
 	int level = _currentTable->level();
 	writeCommand("MOV D" + to_string(level) + " SP");
 
-	//the return value is now one above the stack
-	//at the SP is the PC before the function call
-	//and and below that are all of the input variables
-	
-	int alloc = _currentTable->allocSize();
+	//the return value is one below the stack pointer
+	//and the PC value is one below that
 
-	int offset = alloc;
-	writeCommand("MOV 1(SP) " + to_string(-(offset)) + "(SP)"); //move Ret
-	writeCommand("MOV 0(SP) " + to_string(-(offset)+1) + "(SP)"); //move PC
+	//int argSize = _currentTable->allocSize(); //- _currentTable->size();
+	int argSize = _currentTable->argumentTypes().size();
+
+	//argSize = argSize + 10;
+
+
+	//int offset = argSize + 2 ;//one for the PC and one for the ReVal
+	writeCommand("MOV -12(SP) 0(SP)"); //move PC to safety
+	writeCommand("MOV -11(SP) 1(SP)"); //move Ret Val to safety
+
+	writeCommand("MOV 1(SP) " + to_string(-(12 + argSize)) + "(SP)"); //move Ret
+	writeCommand("MOV 0(SP) " + to_string(-(11 + argSize)) + "(SP)"); //move PC
 
 	//move the SP into position
+	restoreRegisterState();
+
+	//ont top of the stack are space for the arguments
+	//and for the return value and the PC
+
+	argSize = _currentTable->argumentTypes().size();
 
 	writeCommand("PUSH SP");
-	writeCommand("PUSH #1");// for ret val
-	writeCommand("ADDS");
-	writeCommand("PUSH #" +to_string(alloc)); //for offset
+	//we want to be right above the pc which should 2 up!
+	writeCommand("PUSH #" + to_string((argSize))); //for offset
 	writeCommand("SUBS");
 	writeCommand("POP SP");
-	writeCommand("RET");
 
+	writeCommand("RET");
 }
 
 void SemanticAnalyser::procedureHeading(int& beginProc)
@@ -666,23 +669,30 @@ void SemanticAnalyser::procedureHeading(int& beginProc)
 
 void SemanticAnalyser::procedureEnd()
 {
+
 	//put the stack pointer back to its original spot
 	int level = _currentTable->level();
 	writeCommand("MOV D" + to_string(level) + " SP");
 
-	//the return value is now one above the stack
-	//at the SP is the PC before the function call
-	//and and below that are all of the input variables
+	//the return value is one below the stack pointer
+	//and the PC value is one below that
 
-	int alloc = _currentTable->allocSize();
+	//int argSize = _currentTable->allocSize(); //- _currentTable->size();
+	int argSize = _currentTable->argumentTypes().size();
 
-	int offset = alloc;
-	writeCommand("MOV 0(SP) " + to_string(-(offset)) + "(SP)"); //move PC
+	argSize = argSize + 10;
+
+	int offset = argSize + 1;//one for the PC
+	writeCommand("MOV -11(SP) 0(SP)"); //move PC to safety
+	writeCommand("MOV 0(SP) " + to_string((-offset)) + "(SP)"); //move PC
 
 	//move the SP into position
+	restoreRegisterState();
+	//argSize = _currentTable->allocSize();// -_currentTable->size();
+	argSize =_currentTable->argumentTypes().size();
 
 	writeCommand("PUSH SP");
-	writeCommand("PUSH #" + to_string(alloc)); //for offset
+	writeCommand("PUSH #" + to_string((argSize))); //for offset
 	writeCommand("SUBS");
 	writeCommand("POP SP");
 	writeCommand("RET");
@@ -691,12 +701,16 @@ void SemanticAnalyser::procedureEnd()
 
 void SemanticAnalyser::unaryPrefixCommand(SemanticRecord& infixSymbols)
 {
-	assert(infixSymbols.size() == 2);
+	int size = infixSymbols.size();
+	if (!(infixSymbols.size() == 2))
+		throw SemanticAnaylserException("Invlaid number of arguments for prefix command");
 
 	LexemeOperand * first = dynamic_cast<LexemeOperand*>(infixSymbols.getNextOperandPointer());
-	assert(first);
+
+	if (!(first))
+		throw SemanticAnaylserException("Prefix command of wrong type.");
+
 	MachineVal firstArg = generateMachineValue(first->getLexeme());
-	delete first;
 
 	CommandOperand command = infixSymbols.getNextOperandAsCommand();
 
@@ -708,29 +722,37 @@ void SemanticAnalyser::unaryPrefixCommand(SemanticRecord& infixSymbols)
 	//		secondArg = generateMachineValue(second->getLexeme());
 	//}
 
-	_outFile << command.getCommand()  << " " << firstArg.value << " \n";
+	string address = DataIsAddress(firstArg.type) ? "@" : "";
+
+	_outFile << command.getCommand()  << " "<<address << firstArg.value << " \n";
+
+	delete first;
 }
 
 StackOperand SemanticAnalyser::infixStackCommand(SemanticRecord& infixSymbols)
 {
 	int size = infixSymbols.size();
-	assert(infixSymbols.size() == 3);
+	if(!(infixSymbols.size() == 3))
+		throw SemanticAnaylserException("Infix command of wrong number of arguments.");
 	
 	//we need to do some sort of type resolution here if the two operands are not
 	//the same type, one approach could be to take the smallest common type
 	//or to take the type of the first value (current behavior)
 
 	Operand * first = infixSymbols.getNextOperandPointer();
-	push(first);
 
 	CommandOperand command = infixSymbols.getNextOperandAsCommand();
 
+	DataType type = command.type() == UnknownData ? first->type() : command.type();
+
+	push(first, type);
+
 	Operand* second = infixSymbols.getNextOperandPointer();
-	push(second, first->type());
+	push(second, type);
 
 	writeCommand(command.getCommand());
 
-	StackOperand retVal = StackOperand(command.type() == UnknownData ? first->type() : command.type());
+	StackOperand retVal = StackOperand(command.type() == UnknownData ? first->type() : type);
 	
 	//we own these as soon as the are take from the SemanticRecord
 	//delete them now that we are done 
@@ -740,11 +762,46 @@ StackOperand SemanticAnalyser::infixStackCommand(SemanticRecord& infixSymbols)
 	return retVal;
 }
 
+StackOperand SemanticAnalyser::pushAddress(Lexeme lex, DataType type)
+{
+	LexemeOperand nextArg(lex, type);
+	//then we need to push the address of the value 
+	//on to the stack
+	bool ok;
+	DataType outType;
+	string addr = lookupSymbolAddress(nextArg.getName(), ok, outType);
+
+	if (!ok){
+		throw SemanticAnaylserException("Argument not found");
+		//argument not found
+	}
+	if (DataAsReferenceType(outType) != DataAsReferenceType(type)){
+		throw SemanticAnaylserException("Incorrect argumnet type , push ");
+		//incorrect argument type
+	}
+
+	if (DataIsAddress(outType)){
+		Symbol matchingSymbol = lookupSymbol(nextArg.getName(), ok);
+		writeCommand("PUSH " + to_string(matchingSymbol.offset()) + "(D" + to_string(matchingSymbol.level())+")");
+	}
+	else{
+		Symbol matchingSymbol = lookupSymbol(nextArg.getName(), ok);
+
+		writeCommand("PUSH D" + to_string(matchingSymbol.level()));
+		writeCommand("PUSH #" + to_string(matchingSymbol.offset()));
+		writeCommand("ADDS");
+	}
+
+
+
+	return StackOperand(type);
+}
+
 StackOperand SemanticAnalyser::push(Lexeme lex, DataType type)
 {
 	LexemeOperand * lexOp = new LexemeOperand(lex, UnknownData);
 
-	push(lexOp);
+	push(lexOp, type);
 	StackOperand retVal(lexOp->type());
 
 	delete lexOp;
@@ -753,7 +810,8 @@ StackOperand SemanticAnalyser::push(Lexeme lex, DataType type)
 
 Operand SemanticAnalyser::twoValueCommand(const string command, SemanticRecord records)
 {
-	assert(records.size() == 2);
+	if (!(records.size() == 2))
+		throw SemanticAnaylserException("Wrong number of arguments for two valued command");
 
 	//we need to do some sort of type resolution here if the two operands are not
 	//the same type, one approach could be to take the smallest common type
@@ -771,7 +829,7 @@ Operand SemanticAnalyser::twoValueCommand(const string command, SemanticRecord r
 
 	delete first;
 	delete second;
-
+	
 	return StackOperand(typeOfOp);
 }
 
@@ -783,7 +841,10 @@ void SemanticAnalyser::push(Operand* val, DataType castType)
 		//then this should be on the top of the stack
 		//and it doesnt need to be pushed
 		LexemeOperand* lexOp = dynamic_cast<LexemeOperand*>(val);
-		assert(lexOp);
+		
+		if (!(lexOp))
+			throw SemanticAnaylserException("Pushing invalid symbol.");
+
 		MachineVal valAddress = generateMachineValue(lexOp->getLexeme());
 
 		//I dont like this but it is a way to pass the
@@ -803,14 +864,16 @@ void SemanticAnalyser::push(Operand* val, DataType castType)
 		_outFile << "PUSH " << addressOperator << valAddress.value << " \n";
 
 	}
-	if (castType != UnknownData){
+	if (castType != UnknownData && castType != BoolData){
 		cast(val->type(), castType);
 	}
     _outFile.flush();
 }
 
-void SemanticAnalyser::cast(const DataType valType,const DataType toType)
+void SemanticAnalyser::cast(DataType valType, DataType toType)
 {
+	valType = DataAsReferenceType(valType);
+	toType = DataAsReferenceType(toType);
 	if (valType == toType){
 		return; //already the correct type
 	}
@@ -825,7 +888,8 @@ void SemanticAnalyser::cast(const DataType valType,const DataType toType)
 		return;
 	}
 
-	assert(false);
+	throw SemanticAnaylserException("trying to cast uknown type");
+
 	//we should not be casting other type
 	return;
 }

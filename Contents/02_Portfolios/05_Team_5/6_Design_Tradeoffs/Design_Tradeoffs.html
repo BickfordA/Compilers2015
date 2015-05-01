@@ -1,0 +1,146 @@
+<!DOCTYPE html> 
+<html><!-- InstanceBegin template="/Templates/page.dwt" codeOutsideHTMLIsLocked="false" -->
+
+<!-- Mirrored from hypertextbookshop.com/compilers2015/Contents/02_Portfolios/00_Team_0/6_Design_Tradeoffs/Design_Tradeoffs.html by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 27 Apr 2015 02:54:09 GMT -->
+<!-- Added by HTTrack --><meta http-equiv="content-type" content="text/html;charset=utf-8" /><!-- /Added by HTTrack -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<link rel="stylesheet" href="../../../../Stylesheets/prettify.css" />
+<link rel="stylesheet" href="../../../../Stylesheets/pageStylesheet.css" />
+<link rel="stylesheet" href="../../../../Stylesheets/navigationStylesheet.css" />
+<link rel="stylesheet" href="../../../../Stylesheets/allTextStyles.css" />
+<link rel="stylesheet" href="../../../../Stylesheets/colors-blue.css" />
+
+<script type="text/javascript" src="../../../../Scripts/google-code-prettify/run_prettify.js"></script>
+<script type="text/javascript" src="../../../../Scripts/recomputeAttributes.js"></script>
+
+
+<!-- InstanceBeginEditable name="doctitle" -->
+<title>Design Tradeoffs</title>
+<!-- InstanceEndEditable -->
+</head>
+
+<body id="body-style">
+
+<!-- 
+<div id="browser-window-veil">
+</div>
+-->
+
+<div id="page-container">
+
+<header id="header">
+<div id="track-icon1">
+  <img src="../../../../Media/StyleImages/bobcat-small.png" alt="bobcat icon" width="75" height="48"></div>
+<div id="track-icon2">
+</div>
+<div id="track-icon3">
+</div>
+  <div id="headMatter">
+    <span id="headTitle1">
+      <!-- InstanceBeginEditable name="Header" -->
+        Header
+	  <!-- InstanceEndEditable --> 
+    </span>
+    <span id="headTitle2">
+    </span>
+  </div>
+</header>
+
+<nav id="navigate">
+<ul id="nav" >
+  <li><a href="../../../../default.html">Cover</a>
+  </li>
+  <li><a href="#">Contents</a>
+    <ul class="dropdownMenu">
+      <li><a href="../../../01_Introduction/1_Project_Overview/Overview_1.html">Introduction</a></li>
+      <li><a href="../0_Introduction/Cover.html">Portfolios</a></li>
+    </ul>
+  </li>
+  <li><a href="#">Portfolios</a>
+    <ul class="dropdownMenu">
+      <li><a href="../0_Introduction/Cover.html">Team 5</a></li>
+    </ul>
+  </li>
+  <li><a href="#">Team 5</a>
+    <ul class="dropdownMenu">
+      <li><a href="../0_Introduction/Cover.html">Introduction</a></li>
+      <li><a href="../1_Program/1_Scanner_Code.html">Program</a></li>
+      <li><a href="../2_Teamwork/teamwork.html">Teamwork</a></li>
+      <li><a href="../3_Design_Pattern/design_pattern.html">Design Pattern</a></li>
+      <li><a href="../4_Technical_Writing/Technical_Writing.html">Technical Writing</a></li>
+      <li><a href="../5_UML/1_Symbol_Table.html">UML</a></li>
+      <li><a href="Deesign_Tradeoffs.html">Design Tradeoffs</a></li>
+      <li><a href="../7_Life_Cycle/Life_Cycle.html">Life Cycle</a></li>
+    </ul>
+  </li>
+  <li><a href="#">Design Tradeoffs</a>
+    <ul class="dropdownMenu">
+      <li><a href="Deesign_Tradeoffs.html">Deesign Tradeoffs </a></li>
+      <li><a href="Design_Tradeoffs.html">Design Tradeoffs </a></li>
+    </ul>
+  </li>
+  <li><a href="../../../../help.html" target="_blank">Help</a>
+  </li>
+</ul>
+</nav>
+
+
+<aside id="aside-left">
+<div id="asideLeftTitle">
+Compilers 2014
+</div>
+
+</aside>
+
+<aside id="aside-right">
+</aside>
+
+<footer id="footer">
+  <div id="footMatter">
+    <span id="previousPageLink">
+<a href="Deesign_Tradeoffs.html">< Previous</a>
+    </span>
+    <span id="currentPageNumber">
+      Page 2 of 2
+    </span>
+    <span id="nextPageLink">
+    </span>
+  </div>
+</footer>
+
+<article id="mainContent">
+<!-- InstanceBeginEditable name="Main" -->
+<h1>Design Tradeoffs</h1>
+THIS IS AN EXAMPLE. LIST YOUR OWN DESIGN TRADEOFF. THE RESERVED WORD LOOKUP TABLE IS A GOOD ONE, BUT SO IS THE SYMBOL TABLE. REMOVE THIS LINE.
+
+<h2>Data Structure Tradeoffs</h2>
+
+<h3>Resolution of Keywords</h3>
+<p>
+The &micro;-pascal language has 36 reserved words. 
+We chose to use an array to store these words and simply do a linear search of each token scanned to determine whether or not it is a reserved word. 
+While this is not the most efficient method of searching, it is easy to program, and with only 36 elements in the list, is certainly fast enough. 
+A hash function makes little sense on a data set as small as this because calculating the hash would be expensive as performing a linear search. 
+Another alternative would be to implement a binary tree to reduce the search time to O(log(n)). 
+Again, because the data structure is more complicated than a simple array, the actual time savings would be insignificant to the overall runtime of the program.
+</p>
+
+<h3>Symbol Table Design</h3>
+<p>
+Our implementation of the symbol table as a singularly linked list forced our lookup of elements in the table to be O(n). 
+Of course faster search algorithms exist. 
+The symbol table would have to have an additional field representing the nesting level and be a simple list to use a hash table or other data structure that allows faster lookup time. 
+However, this adds some complexity to the search to ensure the variable currently in scope is the variable being referenced. 
+The linked list symbol table with a recursive linear search solves this problem. 
+The actual time difference of faster search algorithms was not sufficient to justify the ease of not only writing the code, but also elegantly solve the problem of variable scope.
+</p>
+<!-- InstanceEndEditable -->
+
+</article>
+</div>
+</body>
+<!-- InstanceEnd -->
+<!-- Mirrored from hypertextbookshop.com/compilers2015/Contents/02_Portfolios/00_Team_0/6_Design_Tradeoffs/Design_Tradeoffs.html by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 27 Apr 2015 02:54:09 GMT -->
+</html>

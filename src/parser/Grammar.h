@@ -13,6 +13,14 @@
 #include <list>
 #include <iostream>
 
+struct ParseException : public std::runtime_error
+{
+	ParseException(std::string const& message)
+		: std::runtime_error(message)
+	{
+	}
+};
+
 class Grammar
 {
 
@@ -53,13 +61,16 @@ private:
 	//access to the current Token's lexeme for semantic records
 	Lexeme currentLexeme();
 
+
 public:
+	bool procedureAssignmentAmbiguity();
 	 
 	 bool factor(SemanticRecord& record);
 	 bool forStatement(); 
 	 bool multiplyingOperator(SemanticRecord& record); 
-	 bool actualParameter(SemanticRecord& params); 
-	 bool actualParameterTail(SemanticRecord& params);
+	 /*need to keep track of when not to push (when passing var)*/
+	 bool actualParameter(SemanticRecord& params, LexemeResources::DataType type);
+	 bool actualParameterTail(SemanticRecord& params, std::list<LexemeResources::DataType>& argumentTypes);
 	 bool addingOperator(SemanticRecord& record); 
 	 bool assignmentStatement();
 	 bool block(int begin); 
@@ -79,11 +90,11 @@ public:
 	 bool identifierTail(SemanticRecord& record); 
 	 bool ifStatement();
 	 bool initialValue(SemanticRecord& record);  
-	 bool optionalActualParameterList(SemanticRecord& parameters);  
+	 bool optionalActualParameterList(SemanticRecord& parameters, std::list<LexemeResources::DataType>& argumentTypes);  
 	 bool optionalElsePart(); 
 	 bool optionalFormalParameterList(SemanticRecord& record); 
 	 bool optionalRelationalPart(SemanticRecord& record); 
-	 bool optionalSign(); 
+	 bool optionalSign(bool&); 
 	 bool ordinalExpression(SemanticRecord& record); 
 	 bool procedureAndFunctionDeclarationPart(); 
 	 bool procedureDeclaration();  //Close procedure SymbolTable

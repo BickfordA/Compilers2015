@@ -1,0 +1,211 @@
+BR L0
+L0:
+MOV SP D0 
+PUSH SP
+PUSH #3 
+ADDS
+POP SP
+;		Pushing: 5 Type:0
+PUSH #5 
+POP 0(D0) 
+;		Pushing: 10 Type:0
+PUSH #10 
+POP 2(D0) 
+;		Pushing: Apples Type:0
+PUSH 0(D0) 
+;		Pushing: Apples Type:0
+PUSH 0(D0) 
+;		Pushing: X Type:0
+PUSH 2(D0) 
+DIVS
+ADDS
+POP 1(D0) 
+;		Pushing: Apples =  Type:1
+PUSH #"Apples = " 
+WRTS
+;		Pushing: Apples Type:0
+PUSH 0(D0) 
+WRTS
+;		Pushing: ; X =  Type:1
+PUSH #"; X = " 
+WRTS
+;		Pushing: X Type:0
+PUSH 2(D0) 
+WRTS
+;		Pushing:  and 5.5Fred =  Type:1
+PUSH #" and 5.5Fred = " 
+WRTS
+;		Pushing: Fred Type:0
+PUSH 1(D0) 
+WRTS
+WRTLN #""
+;		Pushing: Apples Type:0
+PUSH 0(D0) 
+;		Pushing: Apples Type:0
+PUSH 0(D0) 
+;		Pushing: X Type:0
+PUSH 2(D0) 
+MULS
+SUBS
+POP 1(D0) 
+;		Pushing: Apples =  Type:1
+PUSH #"Apples = " 
+WRTS
+;		Pushing: Apples Type:0
+PUSH 0(D0) 
+WRTS
+;		Pushing: ; X =  Type:1
+PUSH #"; X = " 
+WRTS
+;		Pushing: X Type:0
+PUSH 2(D0) 
+WRTS
+;		Pushing:  and -45Fred =  Type:1
+PUSH #" and -45Fred = " 
+WRTS
+;		Pushing: Fred Type:0
+PUSH 1(D0) 
+WRTS
+WRTLN #""
+;		Pushing: Apples Type:0
+PUSH 0(D0) 
+;		Pushing: Apples Type:0
+PUSH 0(D0) 
+;		Pushing: X Type:0
+PUSH 2(D0) 
+DIVS
+SUBS
+POP 1(D0) 
+;		Pushing: Apples =  Type:1
+PUSH #"Apples = " 
+WRTS
+;		Pushing: Apples Type:0
+PUSH 0(D0) 
+WRTS
+;		Pushing: ; X =  Type:1
+PUSH #"; X = " 
+WRTS
+;		Pushing: X Type:0
+PUSH 2(D0) 
+WRTS
+;		Pushing:  and 4.5Fred =  Type:1
+PUSH #" and 4.5Fred = " 
+WRTS
+;		Pushing: Fred Type:0
+PUSH 1(D0) 
+WRTS
+WRTLN #""
+;		Pushing: Apples Type:0
+PUSH 0(D0) 
+;		Pushing: Apples Type:0
+PUSH 0(D0) 
+;		Pushing: X Type:0
+PUSH 2(D0) 
+MULS
+DIVS
+POP 1(D0) 
+;		Pushing: Apples =  Type:1
+PUSH #"Apples = " 
+WRTS
+;		Pushing: Apples Type:0
+PUSH 0(D0) 
+WRTS
+;		Pushing: ; X =  Type:1
+PUSH #"; X = " 
+WRTS
+;		Pushing: X Type:0
+PUSH 2(D0) 
+WRTS
+;		Pushing:  and 0.1Fred =  Type:1
+PUSH #" and 0.1Fred = " 
+WRTS
+;		Pushing: Fred Type:0
+PUSH 1(D0) 
+WRTS
+WRTLN #""
+;		Pushing: Apples Type:0
+PUSH 0(D0) 
+;		Pushing: Apples Type:0
+PUSH 0(D0) 
+ADDS
+;		Pushing: X Type:0
+PUSH 2(D0) 
+SUBS
+POP 1(D0) 
+;		Pushing: Apples =  Type:1
+PUSH #"Apples = " 
+WRTS
+;		Pushing: Apples Type:0
+PUSH 0(D0) 
+WRTS
+;		Pushing: ; X =  Type:1
+PUSH #"; X = " 
+WRTS
+;		Pushing: X Type:0
+PUSH 2(D0) 
+WRTS
+;		Pushing:  and 0Fred =  Type:1
+PUSH #" and 0Fred = " 
+WRTS
+;		Pushing: Fred Type:0
+PUSH 1(D0) 
+WRTS
+WRTLN #""
+;		Pushing: Apples Type:0
+PUSH 0(D0) 
+;		Pushing: Apples Type:0
+PUSH 0(D0) 
+;		Pushing: X Type:0
+PUSH 2(D0) 
+MULS
+MULS
+POP 1(D0) 
+;		Pushing: Apples =  Type:1
+PUSH #"Apples = " 
+WRTS
+;		Pushing: Apples Type:0
+PUSH 0(D0) 
+WRTS
+;		Pushing: ; X =  Type:1
+PUSH #"; X = " 
+WRTS
+;		Pushing: X Type:0
+PUSH 2(D0) 
+WRTS
+;		Pushing:  and 250Fred =  Type:1
+PUSH #" and 250Fred = " 
+WRTS
+;		Pushing: Fred Type:0
+PUSH 1(D0) 
+WRTS
+WRTLN #""
+;		Pushing: Apples Type:0
+PUSH 0(D0) 
+;		Pushing: Apples Type:0
+PUSH 0(D0) 
+SUBS
+;		Pushing: X Type:0
+PUSH 2(D0) 
+SUBS
+POP 1(D0) 
+;		Pushing: Apples =  Type:1
+PUSH #"Apples = " 
+WRTS
+;		Pushing: Apples Type:0
+PUSH 0(D0) 
+WRTS
+;		Pushing: ; X =  Type:1
+PUSH #"; X = " 
+WRTS
+;		Pushing: X Type:0
+PUSH 2(D0) 
+WRTS
+;		Pushing:  and -10Fred =  Type:1
+PUSH #" and -10Fred = " 
+WRTS
+;		Pushing: Fred Type:0
+PUSH 1(D0) 
+WRTS
+WRTLN #""
+MOV D0 SP 
+HLT 
