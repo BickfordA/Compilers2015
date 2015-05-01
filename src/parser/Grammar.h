@@ -86,7 +86,7 @@ public:
 	 bool optionalElsePart(); 
 	 bool optionalFormalParameterList(SemanticRecord& record); 
 	 bool optionalRelationalPart(SemanticRecord& record); 
-	 bool optionalSign(); 
+	 bool optionalSign(bool&); 
 	 bool ordinalExpression(SemanticRecord& record); 
 	 bool procedureAndFunctionDeclarationPart(); 
 	 bool procedureDeclaration();  //Close procedure SymbolTable
