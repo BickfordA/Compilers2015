@@ -77,6 +77,11 @@ void SemanticAnalyser::setTableAsFunction()
 	_currentTable->setFun(true);
 }
 
+void SemanticAnalyser::setTableAsProcedure()
+{
+	_currentTable->setProd(true);
+}
+
 //bool SemanticAnalyser::insertSymbol(const Token token)
 //{
 //	DataType type = UnknownData;
@@ -635,6 +640,7 @@ void SemanticAnalyser::insertArguments(SemanticRecord& inputRecord)
 		//take one more for the return value
 		offset++;
 	}
+	offset = offset + 10; //for register copy 
 	offset = offset* (-1);//moving backwards from SP at time of call
 
 	while (inputRecord.size()){
@@ -656,6 +662,20 @@ void SemanticAnalyser::generateActivationRecord(int beginRecord)
 
 	writeCommand("L" + to_string(beginRecord) + ":");
 
+	if (_currentTable->funProd()){
+		//save all of the registers 
+		writeCommand("PUSH D0");
+		writeCommand("PUSH D1");
+		writeCommand("PUSH D2");
+		writeCommand("PUSH D3");
+		writeCommand("PUSH D4");
+		writeCommand("PUSH D5");
+		writeCommand("PUSH D6");
+		writeCommand("PUSH D7");
+		writeCommand("PUSH D8");
+		writeCommand("PUSH D9");
+	}
+
 	int level = _currentTable->level();
 
 	writeCommand("MOV SP D" + to_string(level));
@@ -663,12 +683,29 @@ void SemanticAnalyser::generateActivationRecord(int beginRecord)
 	writeCommand("PUSH #" + to_string(memAlloc));
 	writeCommand("ADDS");
 	writeCommand("POP SP");
+
+
+
+}
+
+void SemanticAnalyser::restoreRegisterState()
+{
+	writeCommand("POP D9");
+	writeCommand("POP D8");
+	writeCommand("POP D7");
+	writeCommand("POP D6");
+	writeCommand("POP D5");
+	writeCommand("POP D4");
+	writeCommand("POP D3");
+	writeCommand("POP D2");
+	writeCommand("POP D1");
+	writeCommand("POP D0");
 }
 
 void SemanticAnalyser::functionHeading(int& beginLabel)
 {
 	beginLabel = getNextLabelVal();
-	writeCommand("PUSH #1");
+	writeCommand("PUSH #\"Yahoo\"");
 	writeCommand("BR L" + to_string(beginLabel));
 }
 
@@ -680,24 +717,35 @@ void SemanticAnalyser::functionEnd()
 
 	//the return value is one below the stack pointer
 	//and the PC value is one below that
-	
-	int argSize = _currentTable->allocSize() - _currentTable->size();
 
-	int offset = argSize - 2 ;//one for the PC and one for the ReVal
-	writeCommand("MOV -2(SP) 0(SP)"); //move PC to safety
-	writeCommand("MOV -1(SP) " + to_string((offset)) + "(SP)"); //move Ret
-	writeCommand("MOV 0(SP) " + to_string((offset)+1) + "(SP)"); //move PC
+	//int argSize = _currentTable->allocSize(); //- _currentTable->size();
+	int argSize = _currentTable->argumentTypes().size();
+
+	//argSize = argSize + 10;
+
+
+	//int offset = argSize + 2 ;//one for the PC and one for the ReVal
+	writeCommand("MOV -12(SP) 0(SP)"); //move PC to safety
+	writeCommand("MOV -11(SP) 1(SP)"); //move Ret Val to safety
+
+	writeCommand("MOV 1(SP) " + to_string(-(12 + argSize)) + "(SP)"); //move Ret
+	writeCommand("MOV 0(SP) " + to_string(-(11 + argSize)) + "(SP)"); //move PC
 
 	//move the SP into position
+	restoreRegisterState();
+
+	//ont top of the stack are space for the arguments
+	//and for the return value and the PC
+
+	argSize = _currentTable->argumentTypes().size();
 
 	writeCommand("PUSH SP");
-	writeCommand("PUSH #1");// for ret val
-	writeCommand("ADDS");
-	writeCommand("PUSH #" + to_string(-(argSize - 1))); //for offset
+	//we want to be right above the pc which should 2 up!
+	writeCommand("PUSH #" + to_string((argSize))); //for offset
 	writeCommand("SUBS");
 	writeCommand("POP SP");
-	writeCommand("RET");
 
+	writeCommand("RET");
 }
 
 void SemanticAnalyser::procedureHeading(int& beginProc)
@@ -708,6 +756,7 @@ void SemanticAnalyser::procedureHeading(int& beginProc)
 
 void SemanticAnalyser::procedureEnd()
 {
+
 	//put the stack pointer back to its original spot
 	int level = _currentTable->level();
 	writeCommand("MOV D" + to_string(level) + " SP");
@@ -715,16 +764,22 @@ void SemanticAnalyser::procedureEnd()
 	//the return value is one below the stack pointer
 	//and the PC value is one below that
 
-	int argSize = _currentTable->allocSize() - _currentTable->size();
+	//int argSize = _currentTable->allocSize(); //- _currentTable->size();
+	int argSize = _currentTable->argumentTypes().size();
 
-	int offset = argSize - 2;//one for the PC and one for the ReVal
-	writeCommand("MOV -2(SP) 0(SP)"); //move PC to safety
-	writeCommand("MOV 0(SP) " + to_string((offset)+1) + "(SP)"); //move PC
+	argSize = argSize + 10;
+
+	int offset = argSize + 1;//one for the PC
+	writeCommand("MOV -11(SP) 0(SP)"); //move PC to safety
+	writeCommand("MOV 0(SP) " + to_string((-offset)) + "(SP)"); //move PC
 
 	//move the SP into position
+	restoreRegisterState();
+	//argSize = _currentTable->allocSize();// -_currentTable->size();
+	argSize =_currentTable->argumentTypes().size();
 
 	writeCommand("PUSH SP");
-	writeCommand("PUSH #" + to_string(-(argSize - 1))); //for offset
+	writeCommand("PUSH #" + to_string((argSize))); //for offset
 	writeCommand("SUBS");
 	writeCommand("POP SP");
 	writeCommand("RET");
@@ -807,11 +862,19 @@ StackOperand SemanticAnalyser::pushAddress(Lexeme lex, DataType type)
 		//incorrect argument type
 	}
 
-	Symbol matchingSymbol = lookupSymbol(nextArg.getName(), ok);
+	if (DataIsAddress(outType)){
+		Symbol matchingSymbol = lookupSymbol(nextArg.getName(), ok);
+		writeCommand("PUSH " + to_string(matchingSymbol.offset()) + "(D" + to_string(matchingSymbol.level())+")");
+	}
+	else{
+		Symbol matchingSymbol = lookupSymbol(nextArg.getName(), ok);
 
-	writeCommand("PUSH D" + to_string(matchingSymbol.level()));
-	writeCommand("PUSH #" + to_string(matchingSymbol.offset()));
-	writeCommand("ADDS");
+		writeCommand("PUSH D" + to_string(matchingSymbol.level()));
+		writeCommand("PUSH #" + to_string(matchingSymbol.offset()));
+		writeCommand("ADDS");
+	}
+
+
 
 	return StackOperand(type);
 }
