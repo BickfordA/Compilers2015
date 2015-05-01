@@ -13,6 +13,14 @@
 #include <list>
 #include <iostream>
 
+struct ParseException : public std::runtime_error
+{
+	ParseException(std::string const& message)
+		: std::runtime_error(message)
+	{
+	}
+};
+
 class Grammar
 {
 

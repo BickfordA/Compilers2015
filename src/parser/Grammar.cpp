@@ -148,8 +148,8 @@ bool Grammar::factor(SemanticRecord& factor_rec)
 			bool found;
 			Symbol sym = _semanticAnalyser->lookupSymbol(semRect.showNextOperandAs<LexemeOperand>()->getName(),found);
 			
-			if(!found)
-				assert(found);
+			if (!found)
+				throw ParseException("Referenced Identifier not found!!");
 			
 			if (sym.funProd()){
 				SemanticRecord funParams;
@@ -537,7 +537,9 @@ bool Grammar::expression(SemanticRecord& record )
 		simpleExpression(relationRecord);
 		optionalRelationalPart(relationRecord);
 		record.addOperand(relationRecord.getNextOperandPointer());
-		assert(relationRecord.size() == 0);
+		if (!(relationRecord.size() == 0)){
+			throw ParseException("Too many operands!");
+		}
 		return true; }
 	default:
 		error(TypeList() << MP_PLUS << MP_MINUS << MP_LPAREN << MP_STRING_LIT << 
@@ -1083,7 +1085,9 @@ bool Grammar::ordinalExpression(SemanticRecord& record)
 		logRule(112);
 		expression(placeHolder);
 		record.addOperand(placeHolder.getNextOperandPointer());
-		assert(placeHolder.size() == 0);
+		if (!(placeHolder.size() == 0)){
+			throw ParseException("Too many values in ordinal expression");
+		}
 		return true; }
 	default:
 		error(TypeList() << MP_PLUS << MP_MINUS << MP_LPAREN << MP_FALSE << MP_TRUE << MP_IDENTIFIER << MP_NOT << MP_STRING_LIT << MP_FLOAT_LIT << MP_INTEGER_LIT);
@@ -1534,7 +1538,9 @@ bool Grammar::simpleExpression(SemanticRecord& record)
 		//if term tail does anything to thes simpleExp_rec it should be collapsed
 		//in the record to a single operand when it returns so we can pass it back up 
 		record.addOperand(simpExp_rec.getNextOperandPointer());
-		assert(simpExp_rec.size() == 0);
+		if (!(simpExp_rec.size() == 0)){
+			throw ParseException("Too many operands in simple expression");
+		}
 		return true;
 	default:
 		//Everythng else fails
@@ -1785,7 +1791,9 @@ bool Grammar::term(SemanticRecord& term_rec)
 		factor(termRecord);
 		factorTail(termRecord);
 		term_rec.addOperand(termRecord.getNextOperandPointer());
-		assert(termRecord.size() == 0);
+		if (!(termRecord.size() == 0)){
+			throw ParseException("Too many operands in terminal.");
+		}
 
 		return true; }
 

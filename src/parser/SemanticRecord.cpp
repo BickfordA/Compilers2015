@@ -1,5 +1,5 @@
 #include "SemanticRecord.h"
-
+#include "SemanticAnalyzer.h"
 #include <assert.h>
 
 using namespace LexemeResources;
@@ -54,7 +54,7 @@ Operand* SemanticRecord::getNextOperandPointer()
 		_identifiers.pop_front();
 	}
 	if (!nextOp){
-		assert(nextOp);
+		throw SemanticAnaylserException("Pushing invalid symbol.");
 	}
 	return nextOp;
 }
@@ -67,7 +67,7 @@ Operand SemanticRecord::getNextOperand()
 		nextOp = _identifiers.front();
 		_identifiers.pop_front();
 	}
-	assert(nextOp);
+	throw SemanticAnaylserException("Getting next operand, when there isnt one");
 
 	return *nextOp;
 }
@@ -80,7 +80,7 @@ LexemeOperand SemanticRecord::getNextOperandAsLexeme()
 		nextOp = dynamic_cast<LexemeOperand*>( _identifiers.front());
 		_identifiers.pop_front();
 	}
-	assert(nextOp);
+	throw SemanticAnaylserException("Getting next operand, when there isnt one");
 
 	if (nextOp)
 		return *nextOp;

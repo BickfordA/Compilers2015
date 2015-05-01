@@ -2,7 +2,7 @@
 
 //use this to turn on and off comments in the 
 //written uMahine code
-#define ENABLE_DEBUGGING true
+#define ENABLE_DEBUGGING false
 
 #include <assert.h>
 
@@ -82,52 +82,10 @@ void SemanticAnalyser::setTableAsProcedure()
 	_currentTable->setProd(true);
 }
 
-//bool SemanticAnalyser::insertSymbol(const Token token)
-//{
-//	DataType type = UnknownData;
-//
-//	switch (token.getLexeme().getType())
-//	{
-//	case MP_INTEGER:
-//		type = IntData;
-//		break;
-//	case MP_FLOAT:
-//		type = FloatData;
-//		break;
-//	case MP_STRING:
-//		type = StringData;
-//	default:
-//		type = UnknownData;
-//	}
-//
-//	//i think we may need to set the type manually for functions/procedures....
-//	//i am not sure how we will get the reurn type
-//
-//	return insertSymbol(token, type);
-//}
-//
-////bool SemanticAnalyser::insertSymbol(const Token token, DataType type)
-//{
-//	if (!_currentTable){
-//		assert(false);
-//		return false;//this should not happend;
-//	}
-//
-//	bool found;
-//	const Symbol foundSymbol = _currentTable->lookup(token.getLexeme().getValue(), found);
-//
-//	if (found){
-//		symbolCollisionError(token);
-//		return false;
-//	}
-//
-//	_currentTable->insert(token.getLexeme(), type);
-//	return true;
-//}
-
 bool SemanticAnalyser::insertSymbol(const Lexeme lex, DataType type)
 {
 	if (!_currentTable){
+		throw SemanticAnaylserException("Symbol table is not intialized");
 		assert(false);
 		return false;//this should not happend;
 	}
@@ -147,6 +105,7 @@ bool SemanticAnalyser::insertSymbol(const Lexeme lex, DataType type)
 bool SemanticAnalyser::insertArgument(const Lexeme lex, const int offset, const DataType type)
 {
 	if (!_currentTable){
+		throw SemanticAnaylserException("Symbol table is not intialized");
 		assert(false);
 		return false;//this should not happend;
 	}
@@ -171,11 +130,14 @@ bool SemanticAnalyser::insertSymbol(SemanticRecord& record)
 	{
 		if (record.showNextOperandAs<LexemeOperand>()){
 			LexemeOperand* nextOp = record.showNextOperandAs<LexemeOperand>();
-			assert(nextOp);
+			
+			if (!(nextOp))
+				throw SemanticAnaylserException("Trying to insert invalid symbol");
+
 			insertSymbol(nextOp->getLexeme(), nextOp->type());
 		}
 		else{
-			assert(false);
+			throw SemanticAnaylserException("Trying to insert invalid type.");
 			return false;
 		}
 		delete record.getNextOperandPointer();
@@ -183,27 +145,10 @@ bool SemanticAnalyser::insertSymbol(SemanticRecord& record)
 	return true;
 }
 
-//bool SemanticAnalyser::insertArgument(SemanticRecord& record)
-//{
-//	for (int i = 0; i < record.size(); i++)
-//	{
-//		if (record.showNextOperandAs<LexemeOperand>()){
-//			LexemeOperand* nextOp = record.showNextOperandAs<LexemeOperand>();
-//			assert(nextOp);
-//			insertSymbol(nextOp->getLexeme(), nextOp->type());
-//		}
-//		else{
-//			assert(false);
-//			return false;
-//		}
-//		delete record.getNextOperandPointer();
-//	}
-//	return true;
-//}
-
 const Symbol SemanticAnalyser::lookupSymbol(string name, bool& found)
 {
 	if (!_currentTable){
+		throw SemanticAnaylserException("Table is not initialized");
 		assert(false);
 		found = false;
 		return Symbol();
@@ -226,6 +171,16 @@ string SemanticAnalyser::lookupSymbolAddress(string name, bool& found, DataType&
 	string addressString(address);
 
 	return addressString;
+}
+
+string SemanticAnalyser::errorMsg()
+{
+	string error;
+
+	for (string err : _errList){
+		error += err + "\n";
+	}
+	return error;
 }
 
 string SemanticAnalyser::stringLitToVal(string value)
@@ -304,6 +259,7 @@ MachineVal SemanticAnalyser::generateMachineValue(Lexeme lex)
 		machineVal = "#-1";
 		break;
 	default:
+		throw SemanticAnaylserException("Trying to generate value for invalid type!!!.");
 		assert(false);
 		//this shouldnt happen
 		//but i may have missed some
@@ -326,6 +282,7 @@ void SemanticAnalyser::symbolCollisionError(const Token token)
 {
 	string err = "This variable has already been used: " + token.getLexeme().getValue() + " \nline:" + to_string(token.getLineNumber()) + " \ncol:" + to_string(token.getColumnNumber()) + "!!.\n";
 	_errList.push_back(err);
+	throw SemanticAnaylserException(err);
 	assert(false);
 }
 
@@ -563,58 +520,12 @@ void SemanticAnalyser::prodCall(SemanticRecord& id, SemanticRecord& args)
 	//look up the function
 
 	LexemeOperand* fun = id.showNextOperandAs<LexemeOperand>();
-	assert(fun);
+	if (!(fun))
+		throw SemanticAnaylserException("Procedure call for invalid type");
 	bool ok = false;
 	const Symbol funSymbol = lookupSymbol(fun->getName(), ok);
 
 	list<DataType> argTypes = funSymbol.argumentTypes();
-	
-
-	//TODO: check the input types vs the required types
-
-	//while (args.size() > 0){
-	//	if (argTypes.size() == 0){
-	//		//error out with "Incorrect number of arguments"
-	//		assert(false);
-	//		break;
-	//	}
-	//	DataType nextArgType = argTypes.front();
-	//	argTypes.pop_front();
-
-	//	if (args.showNextOperandAs<LexemeOperand>()){
-	//		LexemeOperand nextArg = args.getNextOperandAsLexeme();
-	//		if (DataIsAddress(nextArgType)){
-	//			//then we need to push the address of the value 
-	//			//on to the stack
-	//			bool ok;
-	//			DataType outType;
-	//			string addr = lookupSymbolAddress(nextArg.getName(), ok, outType);
-
-	//			if (!ok){
-	//				assert(false);
-	//				//argument not found
-	//			}
-	//			if (outType != DataAsReferenceType(nextArgType)){
-	//				assert(false);
-	//				//incorrect argument type
-	//			}
-
-	//			Symbol matchingSymbol = lookupSymbol(nextArg.getName(), ok);
-
-	//			writeCommand("PUSH D" + to_string(matchingSymbol.level()));
-	//			writeCommand("PUSH #" +to_string( matchingSymbol.offset()));
-	//			writeCommand("ADDS");
-	//		}
-	//		else{
-	//			//just push the value its self
-	//			push(&nextArg, nextArgType);
-	//		}
-	//	}
-	//	else{
-	//		//they should all have lexemes so we can lok them up
-	//		assert(false);
-	//	}
-	//}
 
 	writeCommand("CALL L" + to_string(funSymbol.label()));
 }
@@ -624,7 +535,9 @@ Operand* SemanticAnalyser::funCall(SemanticRecord& id, SemanticRecord& args)
 	prodCall(id, args);
 
 	LexemeOperand* fun = id.showNextOperandAs<LexemeOperand>();
-	assert(fun);
+	if(!(fun))
+		throw SemanticAnaylserException("Fun call for invalid type");
+
 	bool ok = false;
 	const Symbol funSymbol = lookupSymbol(fun->getName(), ok);
 
@@ -789,10 +702,14 @@ void SemanticAnalyser::procedureEnd()
 void SemanticAnalyser::unaryPrefixCommand(SemanticRecord& infixSymbols)
 {
 	int size = infixSymbols.size();
-	assert(infixSymbols.size() == 2);
+	if (!(infixSymbols.size() == 2))
+		throw SemanticAnaylserException("Invlaid number of arguments for prefix command");
 
 	LexemeOperand * first = dynamic_cast<LexemeOperand*>(infixSymbols.getNextOperandPointer());
-	assert(first);
+
+	if (!(first))
+		throw SemanticAnaylserException("Prefix command of wrong type.");
+
 	MachineVal firstArg = generateMachineValue(first->getLexeme());
 
 	CommandOperand command = infixSymbols.getNextOperandAsCommand();
@@ -815,7 +732,8 @@ void SemanticAnalyser::unaryPrefixCommand(SemanticRecord& infixSymbols)
 StackOperand SemanticAnalyser::infixStackCommand(SemanticRecord& infixSymbols)
 {
 	int size = infixSymbols.size();
-	assert(infixSymbols.size() == 3);
+	if(!(infixSymbols.size() == 3))
+		throw SemanticAnaylserException("Infix command of wrong number of arguments.");
 	
 	//we need to do some sort of type resolution here if the two operands are not
 	//the same type, one approach could be to take the smallest common type
@@ -854,11 +772,11 @@ StackOperand SemanticAnalyser::pushAddress(Lexeme lex, DataType type)
 	string addr = lookupSymbolAddress(nextArg.getName(), ok, outType);
 
 	if (!ok){
-		assert(false);
+		throw SemanticAnaylserException("Argument not found");
 		//argument not found
 	}
 	if (DataAsReferenceType(outType) != DataAsReferenceType(type)){
-		assert(false);
+		throw SemanticAnaylserException("Incorrect argumnet type , push ");
 		//incorrect argument type
 	}
 
@@ -892,7 +810,8 @@ StackOperand SemanticAnalyser::push(Lexeme lex, DataType type)
 
 Operand SemanticAnalyser::twoValueCommand(const string command, SemanticRecord records)
 {
-	assert(records.size() == 2);
+	if (!(records.size() == 2))
+		throw SemanticAnaylserException("Wrong number of arguments for two valued command");
 
 	//we need to do some sort of type resolution here if the two operands are not
 	//the same type, one approach could be to take the smallest common type
@@ -922,7 +841,10 @@ void SemanticAnalyser::push(Operand* val, DataType castType)
 		//then this should be on the top of the stack
 		//and it doesnt need to be pushed
 		LexemeOperand* lexOp = dynamic_cast<LexemeOperand*>(val);
-		assert(lexOp);
+		
+		if (!(lexOp))
+			throw SemanticAnaylserException("Pushing invalid symbol.");
+
 		MachineVal valAddress = generateMachineValue(lexOp->getLexeme());
 
 		//I dont like this but it is a way to pass the
@@ -966,7 +888,8 @@ void SemanticAnalyser::cast(DataType valType, DataType toType)
 		return;
 	}
 
-	assert(false);
+	throw SemanticAnaylserException("trying to cast uknown type");
+
 	//we should not be casting other type
 	return;
 }

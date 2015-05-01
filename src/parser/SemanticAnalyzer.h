@@ -12,6 +12,14 @@
 #include <iostream>
 #include <fstream>
 
+struct SemanticAnaylserException : public std::runtime_error
+{
+	SemanticAnaylserException(std::string const& message)
+		: std::runtime_error(message)
+	{
+	}
+};
+
 
 struct MachineVal
 {
