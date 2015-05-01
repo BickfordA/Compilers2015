@@ -878,7 +878,7 @@ void SemanticAnalyser::push(Operand* val, DataType castType)
 		_outFile << "PUSH " << addressOperator << valAddress.value << " \n";
 
 	}
-	if (castType != UnknownData){
+	if (castType != UnknownData && castType != BoolData){
 		cast(val->type(), castType);
 	}
     _outFile.flush();

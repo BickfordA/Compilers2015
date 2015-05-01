@@ -104,12 +104,12 @@ bool Grammar::factor(SemanticRecord& factor_rec)
 			match();
 			return true;
 		case MP_TRUE:
-			factor_rec.addOperand(_semanticAnalyser->push(currentLexeme(), BoolData));
+			factor_rec.addOperand(_semanticAnalyser->push(currentLexeme(), IntData));
 			logRule(102);
 			match();
 			return true;
 		case MP_FALSE:
-			factor_rec.addOperand(_semanticAnalyser->push(currentLexeme(), BoolData));
+			factor_rec.addOperand(_semanticAnalyser->push(currentLexeme(), IntData));
 			logRule(103);
 			match();
 			return true;
@@ -1512,10 +1512,9 @@ bool Grammar::simpleExpression(SemanticRecord& record)
 	case MP_TRUE:
 		//all of the above cases fall through to parse <Term> <TermTail>
 		LOG(82, logged);
+		negate = false;
 		optionalSign(negate);
 		term(simpExp_rec);
-		termTail(simpExp_rec);
-
 
 		// optional negation
 		if (negate){
@@ -1527,6 +1526,9 @@ bool Grammar::simpleExpression(SemanticRecord& record)
 			}
 		}
 
+
+		termTail(simpExp_rec);
+		
 		//if term tail does anything to thes simpleExp_rec it should be collapsed
 		//in the record to a single operand when it returns so we can pass it back up 
 		record.addOperand(simpExp_rec.getNextOperandPointer());
@@ -1860,7 +1862,7 @@ bool Grammar::type(SemanticRecord& type_rec)
 		logRule(10);
 		return match();
 	case MP_BOOLEAN:
-		type_rec.setType(BoolData);
+		type_rec.setType(IntData);
 		logRule(13);
 		return match();
 	case MP_FLOAT:
