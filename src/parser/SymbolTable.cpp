@@ -45,7 +45,8 @@ SymbolTable* SymbolTable::closeTable(int label)
 		Symbol newSymbol(_lexeme, _dataType, _level, 0, _size);
 		newSymbol.setLabel(label);
 		newSymbol.setArgumentTypes(this->argumentTypes());
-		newSymbol.setFunProd(true);
+		newSymbol.setProd(this->funProd());
+		newSymbol.setFun(this->function());
 		//add itself to the parent table
 		_parentTable->insert(newSymbol);
 	}
@@ -106,7 +107,8 @@ const Symbol SymbolTable::lookup(const string name, bool& outFound)
 	
 	if (name == _lexeme.getValue()){
 		Symbol thisSym(*this);
-		thisSym.setFunProd(true);
+		thisSym.setFun(this->function());
+		thisSym.setProd(this->funProd());
 		return thisSym;
 	}
 	

@@ -32,11 +32,14 @@ public:
 	void setLabel(int label);
 	int label() const;
 
-	void setFunProd(bool isFunProd);
+	void setProd(bool isProd);
+	void setFun(bool isFun);
 	bool funProd();
+	bool function();
 
 protected:
-	bool _isFunProd;
+	bool _isFun;
+	bool _isProc;
 
 	int _label;
 

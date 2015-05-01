@@ -39,6 +39,7 @@ public:
 	bool createTable(LexemeOperand operand);
 	bool createTable(const Lexeme token, LexemeResources::DataType type);
 	void closeTable(bool deleteEntry= false); 
+	void setTableAsFunction();
 
 	bool insertSymbol(const Lexeme lex, LexemeResources::DataType type);
 	bool insertArgument(const Lexeme lex, const int offset, const LexemeResources::DataType type);

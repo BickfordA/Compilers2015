@@ -735,6 +735,7 @@ bool Grammar::functionHeading()
 		type(functionHeading_rec);
 		//_semanticAnalyser->insertSymbol(functionHeading_rec.showNextId(), functionHeading_rec.getType()); 
 		_semanticAnalyser->createTable(functionHeading_rec.getNextOperandAsLexeme());
+		_semanticAnalyser->setTableAsFunction();
 		_semanticAnalyser->insertArguments(optionalFormalParameterList_rec);
 		return true;
 	default:

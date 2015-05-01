@@ -71,6 +71,12 @@ void SemanticAnalyser::closeTable(bool deleteEntry)
 	}
 }
 
+
+void SemanticAnalyser::setTableAsFunction()
+{
+	_currentTable->setFun(true);
+}
+
 //bool SemanticAnalyser::insertSymbol(const Token token)
 //{
 //	DataType type = UnknownData;
@@ -617,6 +623,7 @@ Operand* SemanticAnalyser::funCall(SemanticRecord& id, SemanticRecord& args)
 	bool ok = false;
 	const Symbol funSymbol = lookupSymbol(fun->getName(), ok);
 
+
 	return new StackOperand(funSymbol.dataType());
 }
 
@@ -624,6 +631,10 @@ void SemanticAnalyser::insertArguments(SemanticRecord& inputRecord)
 {
 	int offset = inputRecord.size();
 	offset++; //for the program counter
+	if (_currentTable->function()){
+		//take one more for the return value
+		offset++;
+	}
 	offset = offset* (-1);//moving backwards from SP at time of call
 
 	while (inputRecord.size()){
@@ -657,6 +668,7 @@ void SemanticAnalyser::generateActivationRecord(int beginRecord)
 void SemanticAnalyser::functionHeading(int& beginLabel)
 {
 	beginLabel = getNextLabelVal();
+	writeCommand("PUSH #1");
 	writeCommand("BR L" + to_string(beginLabel));
 }
 
@@ -666,22 +678,22 @@ void SemanticAnalyser::functionEnd()
 	int level = _currentTable->level();
 	writeCommand("MOV D" + to_string(level) + " SP");
 
-	//the return value is now one above the stack
-	//at the SP is the PC before the function call
-	//and and below that are all of the input variables
+	//the return value is one below the stack pointer
+	//and the PC value is one below that
 	
 	int argSize = _currentTable->allocSize() - _currentTable->size();
 
-	int offset = argSize;
-	writeCommand("MOV 0(SP) " + to_string(-(offset)) + "(SP)"); //move Ret
-	writeCommand("MOV -1(SP) " + to_string(-(offset)+1) + "(SP)"); //move PC
+	int offset = argSize - 2 ;//one for the PC and one for the ReVal
+	writeCommand("MOV -2(SP) 0(SP)"); //move PC to safety
+	writeCommand("MOV -1(SP) " + to_string((offset)) + "(SP)"); //move Ret
+	writeCommand("MOV 0(SP) " + to_string((offset)+1) + "(SP)"); //move PC
 
 	//move the SP into position
 
 	writeCommand("PUSH SP");
 	writeCommand("PUSH #1");// for ret val
 	writeCommand("ADDS");
-	writeCommand("PUSH #" + to_string(argSize - 1)); //for offset
+	writeCommand("PUSH #" + to_string(-(argSize - 1))); //for offset
 	writeCommand("SUBS");
 	writeCommand("POP SP");
 	writeCommand("RET");
@@ -700,20 +712,19 @@ void SemanticAnalyser::procedureEnd()
 	int level = _currentTable->level();
 	writeCommand("MOV D" + to_string(level) + " SP");
 
-	//the return value is now one above the stack
-	//at the SP is the PC before the function call
-	//and and below that are all of the input variables
+	//the return value is one below the stack pointer
+	//and the PC value is one below that
 
 	int argSize = _currentTable->allocSize() - _currentTable->size();
 
-	int offset = argSize;
-	writeCommand("MOV 0(SP) " + to_string(-(offset)) + "(SP)"); //move Ret
-	//writeCommand("MOV -1(SP) " + to_string(-(offset)+1) + "(SP)"); //move PC
+	int offset = argSize - 2;//one for the PC and one for the ReVal
+	writeCommand("MOV -2(SP) 0(SP)"); //move PC to safety
+	writeCommand("MOV 0(SP) " + to_string((offset)+1) + "(SP)"); //move PC
 
 	//move the SP into position
 
 	writeCommand("PUSH SP");
-	writeCommand("PUSH #" + to_string(argSize)); //for offset
+	writeCommand("PUSH #" + to_string(-(argSize - 1))); //for offset
 	writeCommand("SUBS");
 	writeCommand("POP SP");
 	writeCommand("RET");
@@ -727,7 +738,6 @@ void SemanticAnalyser::unaryPrefixCommand(SemanticRecord& infixSymbols)
 	LexemeOperand * first = dynamic_cast<LexemeOperand*>(infixSymbols.getNextOperandPointer());
 	assert(first);
 	MachineVal firstArg = generateMachineValue(first->getLexeme());
-	delete first;
 
 	CommandOperand command = infixSymbols.getNextOperandAsCommand();
 
@@ -739,7 +749,11 @@ void SemanticAnalyser::unaryPrefixCommand(SemanticRecord& infixSymbols)
 	//		secondArg = generateMachineValue(second->getLexeme());
 	//}
 
-	_outFile << command.getCommand()  << " " << firstArg.value << " \n";
+	string address = DataIsAddress(firstArg.type) ? "@" : "";
+
+	_outFile << command.getCommand()  << " "<<address << firstArg.value << " \n";
+
+	delete first;
 }
 
 StackOperand SemanticAnalyser::infixStackCommand(SemanticRecord& infixSymbols)
