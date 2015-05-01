@@ -1322,6 +1322,7 @@ bool Grammar::readParameter()
 			//Do not know why the nest two lines are not working
 			//readParameter_rec.addOperand(CommandOperand("RD"));
 			//_semanticAnalyser->unaryPrefixCommand(readParameter_rec);
+			type = DataAsReferenceType(type);
 			
 			if (type == LexemeResources::IntData)
 			{

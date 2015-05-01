@@ -733,6 +733,7 @@ void SemanticAnalyser::procedureEnd()
 
 void SemanticAnalyser::unaryPrefixCommand(SemanticRecord& infixSymbols)
 {
+	int size = infixSymbols.size();
 	assert(infixSymbols.size() == 2);
 
 	LexemeOperand * first = dynamic_cast<LexemeOperand*>(infixSymbols.getNextOperandPointer());
