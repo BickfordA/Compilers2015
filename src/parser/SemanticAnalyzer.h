@@ -40,6 +40,7 @@ public:
 	bool createTable(const Lexeme token, LexemeResources::DataType type);
 	void closeTable(bool deleteEntry= false); 
 	void setTableAsFunction();
+	void setTableAsProcedure();
 
 	bool insertSymbol(const Lexeme lex, LexemeResources::DataType type);
 	bool insertArgument(const Lexeme lex, const int offset, const LexemeResources::DataType type);
@@ -91,6 +92,7 @@ public:
 	void prodCall(SemanticRecord& id, SemanticRecord& args);
 
 	void generateActivationRecord(int beginRecord);
+	void restoreRegisterState();
 
 	void insertArguments(SemanticRecord& inputArgs);
 

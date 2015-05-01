@@ -1168,6 +1168,7 @@ bool Grammar::procedureHeading()
 		procedureIdentifier(procedureHeading_rec);
 		//_semanticAnalyser->insertSymbol(procedureHeading_rec.showNextId(), procedureHeading_rec.getType());
 		_semanticAnalyser->createTable(procedureHeading_rec.getNextOperandAsLexeme());
+		_semanticAnalyser->setTableAsProcedure();
 		optionalFormalParameterList(optionalFormalParameterList_rec);
 		_semanticAnalyser->insertArguments(optionalFormalParameterList_rec);
 		return true;

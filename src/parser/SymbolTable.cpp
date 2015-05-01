@@ -107,6 +107,8 @@ const Symbol SymbolTable::lookup(const string name, bool& outFound)
 	
 	if (name == _lexeme.getValue()){
 		Symbol thisSym(*this);
+		if (this->function())
+			thisSym.setOffset(-11);
 		thisSym.setFun(this->function());
 		thisSym.setProd(this->funProd());
 		return thisSym;
