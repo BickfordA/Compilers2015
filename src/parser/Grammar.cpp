@@ -2143,12 +2143,14 @@ bool Grammar::writeStatement()
 {
 	SemanticRecord writeRecords;
 	bool log = false;
+	bool newLine = false;
 	switch (nextTokenType())
 	{
-	case MP_WRITE:
-		LOG(49, log);
-	case MP_WRITELN:{
+	case MP_WRITELN:
+		newLine = true;
 		LOG(50, log);
+	case MP_WRITE:{
+		LOG(49, log);
 		bool addLine = nextTokenType() == MP_WRITELN ? true : false;
 		match();
 		if (nextTokenType() != MP_LPAREN){
@@ -2160,7 +2162,8 @@ bool Grammar::writeStatement()
 			writeParameter(writeRecords);
 			writeParameterTail(writeRecords);
 			//_semanticAnalyser->writeList(writeRecords, addLine);
-			_semanticAnalyser->writeCommand("WRTLN #\"\"");
+			if (newLine)
+				_semanticAnalyser->writeCommand("WRTLN #\"\"");
 			if (nextTokenType() != MP_RPAREN){
 				error(TypeList() << MP_RPAREN);
 				return false;

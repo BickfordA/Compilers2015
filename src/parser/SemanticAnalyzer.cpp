@@ -91,7 +91,7 @@ bool SemanticAnalyser::insertSymbol(const Lexeme lex, DataType type)
 	}
 
 	bool found;
-	const Symbol foundSymbol = _currentTable->lookup(lex.getValue(), found);
+	const Symbol foundSymbol = _currentTable->lookUpAtLevel(lex.getValue(), found);
 
 	if (found){
 		symbolCollisionError(Token(lex, -1, -1));
@@ -526,6 +526,12 @@ void SemanticAnalyser::prodCall(SemanticRecord& id, SemanticRecord& args)
 	const Symbol funSymbol = lookupSymbol(fun->getName(), ok);
 
 	list<DataType> argTypes = funSymbol.argumentTypes();
+
+	while (!argTypes.empty()){
+		if (argTypes.front() != args.getNextOperand().type()){
+			throw SemanticAnaylserException("Incorrect argument type for: " + fun->getName());
+		}
+	}
 
 	writeCommand("CALL L" + to_string(funSymbol.label()));
 }
