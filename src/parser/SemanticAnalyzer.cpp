@@ -756,6 +756,10 @@ StackOperand SemanticAnalyser::infixStackCommand(SemanticRecord& infixSymbols)
 	Operand* second = infixSymbols.getNextOperandPointer();
 	push(second, type);
 
+	if (first->type() == IntData && second->type() == IntData && command.type() == FloatData){
+		throw SemanticAnaylserException("Trying to do Float operation on two Integers: " + first->getName() +" " + second->getName() + " Command: " + command.getCommand());
+	}
+
 	writeCommand(command.getCommand());
 
 	StackOperand retVal = StackOperand(command.type() == UnknownData ? first->type() : type);
@@ -799,8 +803,9 @@ StackOperand SemanticAnalyser::pushAddress(Lexeme lex, DataType type)
 	}
 
 
-
-	return StackOperand(type);
+	StackOperand newOp(type);
+	newOp.setName(lex.getValue());
+	return newOp;
 }
 
 StackOperand SemanticAnalyser::push(Lexeme lex, DataType type)

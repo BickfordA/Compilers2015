@@ -56,7 +56,15 @@ bool StackOperand::onTopOfStack()
 	return true; 
 }
 
+void StackOperand::setName(string name)
+{
+	_name = name;
+}
 
+string StackOperand::getName()
+{
+	return _name;
+}
 
 // --------------
 // LexemeOperand

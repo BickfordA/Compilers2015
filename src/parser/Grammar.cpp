@@ -149,7 +149,7 @@ bool Grammar::factor(SemanticRecord& factor_rec)
 			Symbol sym = _semanticAnalyser->lookupSymbol(semRect.showNextOperandAs<LexemeOperand>()->getName(),found);
 			
 			if (!found)
-				throw ParseException("Referenced Identifier not found!!");
+				throw ParseException("Referenced Iderntifier not found!!");
 			
 			if (sym.funProd()){
 				SemanticRecord funParams;
@@ -434,7 +434,7 @@ bool Grammar::booleanExpression(SemanticRecord& record)
 	case MP_NOT:
 	case MP_TRUE:
 	case MP_IDENTIFIER:
-	case MP_INTEGER:
+	case MP_INTEGER_LIT:
 	case MP_FIXED_LIT:
 	case MP_STRING_LIT:
 		logRule(111);
@@ -449,7 +449,7 @@ bool Grammar::booleanExpression(SemanticRecord& record)
 		return true;
 	default:
 		error(TypeList() << MP_FALSE << MP_NOT << MP_TRUE 
-			<< MP_IDENTIFIER << MP_INTEGER << MP_FIXED_LIT
+			<< MP_IDENTIFIER << MP_INTEGER_LIT << MP_FIXED_LIT
 			<< MP_STRING_LIT << MP_LPAREN << MP_MINUS << MP_PLUS );
 	}
 	return false;

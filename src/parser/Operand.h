@@ -39,7 +39,11 @@ public:
 	StackOperand(LexemeResources::DataType type);
 
 	bool onTopOfStack();
+	std::string getName();
+	void setName(std::string name);
 
+private :
+	std::string  _name;
 };
 
 
