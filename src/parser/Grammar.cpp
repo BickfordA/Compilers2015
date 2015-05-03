@@ -1901,18 +1901,22 @@ bool Grammar::valueParameterSection(SemanticRecord& valueParameterSection_rec)
 {
 	switch (nextTokenType())
 	{
-	case MP_IDENTIFIER:
+	case MP_IDENTIFIER:{
+		SemanticRecord valueRecord;
 		logRule(27);
-		identifierList(valueParameterSection_rec);
+		identifierList(valueRecord);
 		if (nextTokenType() == MP_COLON)
 		{
 			match();
-			type(valueParameterSection_rec);
-			return true;
+			type(valueRecord);
 		}
 		else {
 			error(TypeList() << MP_COLON);
 			return false;
+		}
+		valueParameterSection_rec.addOperands(valueRecord);
+		return true;
+		break;
 		}
 	default:
 		error(TypeList() << MP_IDENTIFIER);
