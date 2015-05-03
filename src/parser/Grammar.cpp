@@ -153,7 +153,8 @@ bool Grammar::factor(SemanticRecord& factor_rec)
 			
 			if (sym.funProd()){
 				SemanticRecord funParams;
-				optionalActualParameterList(funParams, sym.argumentTypes());
+				list<DataType> types = sym.argumentTypes();
+				optionalActualParameterList(funParams, types);
 				factor_rec.addOperand(_semanticAnalyser->funCall(semRect, funParams));
 			}
 			else{

@@ -118,6 +118,10 @@ Identify one design pattern that was used in your capstone project and describe 
 <h2>Design Patterns in the Compilers Course</h2>
 <p>The components of the compiler&#8212;the scanner, parser, symbol table, and semantic analyzer&#8212;were each by way of a specific pattern that students were asked to follow. In some cases, students were allowed to deviate from the patterns. As a result, some students may have chosen a different formal design pattern for portions of the compiler. If so, they appear below.</p>
 <h2>Specific Design Patterns</h2>
+
+<details>
+<summary><b>Inheritance</b></summary>
+
 <p>
 Inheritance was used in the Semantic Analyser to represent the different types of operands that could be passed into machine instruction expressions.  The base class for this inheritance scheme was <i>Operand</i>.It was extended by classes <i>Stack Operand</i>, <i>LexemeOperand</i>, and <i>Command Operand</i>. This allowed for polymorphic operands to be stored as pointers in the semantic records so that commands could be passed different operand types in the same semantic record.
 </p>
@@ -179,28 +183,244 @@ protected:
   const std::string _command;
 };
 
+<!--<span class="nocode">...</span> -->
 </code></pre>
+</details>
 
+
+<details>
+<summary><b>Facade Pattern</b></summary>
 <p>
 A Facade pattern was used for the parser. This simplified the interface that the controling program had to interact with, while the <i>Parser</i> class was just a facade for the underlying <i>Grammer</i> class which held the functions used for determining the semantic correctness of the token stream. 
 </p>
 
 <pre class="prettyprint" ><code class="language-c++">
-public class Table {
 
-	private Table(Table parent) {
-		this.parent = parent;
-	}
-	
-	public static Table rootInstance() {
-		return root;
-	}
+class Parser
+{
+public:
+  Parser(TokenStream* tokens, Grammar *grammar = 0);
+  ~Parser();
+
+  void parseTokens();
+  std::string errMsgs();
+
+  void printLog();
+
+protected:
+  
+  TokenStream* _tokens;
+  Grammar* _grammar;
+};
 	
 	<span class="nocode">...</span>
-	
+
+void Parser::parseTokens()
+{
+  _grammar->_semanticAnalyser = new SemanticAnalyser();
+  _grammar->setTokenStream(_tokens);
+  try{
+    try{
+      _grammar->systemGoal();
+    }
+    catch (ParseException parseErrors){
+      string error;// = _grammar->();
+      fprintf(stdout, error.c_str());
+    }
+  }
+  catch (SemanticAnaylserException exception)
+  {
+    string error = _grammar->_semanticAnalyser->errorMsg();
+    error += exception.what();
+    fprintf(stdout, error.c_str());
+  }
+  delete _grammar->_semanticAnalyser;
+}
+  <span class="nocode">...</span>
 }
 </code></pre>
-<!-- InstanceEndEditable -->
+</details>
+
+
+<details>
+<summary><b>Iterator Pattern</b></summary>
+<p>
+An iterator pattern was used for the tokens.  The tokens were read from the scanner into a <i>TokenStream</i> class.  This abstracted away the underlying list which holds the tokens. The parser then interacted with the <i>TokenStream</i> class to perfrom the token look ahead, and to advance the tokens as the stream of tokens was parsed.
+</p>
+
+<pre class="prettyprint" ><code class="language-c++">
+
+
+class TokenStream
+{
+public:
+
+  bool moveAhead();
+  
+  
+  bool nextToken(Token& nextToken) const;
+  bool secondNextToken(Token& nextToken) const;
+  LexemeResources::LexemeType nextTokenType() const;
+  
+  void addToken(Token newToken);
+
+  Lexeme currentLexeme();  //used in generating semantic records
+
+protected:
+
+  std::list<Token> _toRead;
+};
+
+  <span class="nocode">...</span>
+
+bool TokenStream::moveAhead()
+{
+  if (_toRead.empty())
+    return false;
+  _toRead.pop_front();
+  return true;
+}
+
+bool TokenStream::nextToken(Token& next) const
+{
+  if (_toRead.empty())
+    return false;
+
+  next = _toRead.front();
+  return true;
+}
+
+}
+</code></pre>
+</details>
+
+
+
+<details>
+<summary><b>Prototype Pattern</b></summary>
+<p>
+A prototype pattern was used for the creation of the symbol tables.  A prototype symbol of type <i>SymbolTable</i> was created when a new symbol table was created.  This table was populated with the with it's symbols and which were used to generate the uMachine instructions for that section of code.  When the symbol table when out of scope the <i>SymbolTable</i> was used to create a more generic <i>Symbol</i> entry in the parent table.
+</p>
+
+<pre class="prettyprint" ><code class="language-c++">
+
+class SymbolTable : public Symbol
+{
+
+public:
+  SymbolTable(Lexeme lexeme,  LexemeResources::DataType type, int level, SymbolTable* parent = NULL);
+
+  //create a new table and return 
+  // a pointer to the child table
+  SymbolTable* createTable(Lexeme lexeme, LexemeResources::DataType type);
+
+  //close the current table and return
+  // a pointer to the parent table
+  SymbolTable* closeTable(int label);
+
+  void insert(const Lexeme lex, const LexemeResources::DataType type);
+  void insertArgument(const Lexeme lex,const int offset, const LexemeResources::DataType type);
+
+  const Symbol lookUpAtLevel(const std::string name, bool& outFound);
+  const Symbol lookup(const std::string name, bool& outFound);
+
+  void printTable();
+
+  int allocSize();
+
+private:
+  //this should only be called when closing a table 
+  void insert(Symbol tableSymbol);
+
+  int _currentOffset;
+
+  SymbolTable * _parentTable;
+  SymbolTable * _activeChildTable;
+
+  std::unordered_map<std::string, Symbol> _symbolLookup;
+};
+
+  <span class="nocode">...</span>
+
+  SymbolTable* SymbolTable::closeTable(int label)
+{
+  unordered_map<string, Symbol>::const_iterator symbolIt = _symbolLookup.begin();
+  while (symbolIt != _symbolLookup.end()){
+    _size += symbolIt->second.size();
+    symbolIt++;
+  }
+
+  //clear the current entries in the table
+  _symbolLookup.clear();
+
+  if (_parentTable){
+    Symbol newSymbol(_lexeme, _dataType, _level, 0, _size);
+    newSymbol.setLabel(label);
+    newSymbol.setArgumentTypes(this->argumentTypes());
+    newSymbol.setProd(this->funProd());
+    newSymbol.setFun(this->function());
+    //add itself to the parent table
+    _parentTable->insert(newSymbol);
+  }
+
+  return _parentTable;
+}
+
+  <span class="nocode">...</span>
+
+class Symbol
+{
+public:
+  Symbol();
+
+  Symbol(Lexeme lex,
+    LexemeResources::DataType dataType, 
+    int level, 
+    int offset = -1, 
+    int size = -1, 
+    std::list<LexemeResources::DataType> arguments = std::list<LexemeResources::DataType>()
+    );
+
+  Lexeme lexeme() const;
+  LexemeResources::DataType dataType() const;
+
+  int size() const;
+  int level() const;
+  int offset() const;
+  void setOffset(int offset);
+
+  std::list<LexemeResources::DataType> argumentTypes() const;
+  void setArgumentTypes(std::list<LexemeResources::DataType> newArguments);
+
+
+  void setLabel(int label);
+  int label() const;
+
+  void setProd(bool isProd);
+  void setFun(bool isFun);
+  bool funProd();
+  bool function();
+
+protected:
+  bool _isFun; //symbol is a function
+  bool _isProc; //symbol is a procedure
+
+  int _label;
+
+  Lexeme _lexeme;
+  LexemeResources::DataType _dataType;
+
+  int _level;
+  int _offset;
+
+  int _size;
+
+  std::list<LexemeResources::DataType> _argumentTypes;
+};
+
+
+</code></pre>
+</details>
 
 </article>
 </div>
