@@ -527,11 +527,11 @@ void SemanticAnalyser::prodCall(SemanticRecord& id, SemanticRecord& args)
 
 	list<DataType> argTypes = funSymbol.argumentTypes();
 
-	while (!argTypes.empty()){
-		if (argTypes.front() != args.getNextOperand().type()){
-			throw SemanticAnaylserException("Incorrect argument type for: " + fun->getName());
-		}
-	}
+//	while (!argTypes.empty()){
+//		if (argTypes.front() != args.getNextOperand().type()){
+//			throw SemanticAnaylserException("Incorrect argument type for: " + fun->getName());
+//		}
+//	}
 
 	writeCommand("CALL L" + to_string(funSymbol.label()));
 }
