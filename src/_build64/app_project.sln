@@ -1,5 +1,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30501.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ALL_BUILD", "ALL_BUILD.vcxproj", "{0E5A8927-5C19-4030-B222-D042D703C794}"
 	ProjectSection(ProjectDependencies) = postProject
 		{25B55853-ED4A-4B50-AFCA-B716C9955BC3} = {25B55853-ED4A-4B50-AFCA-B716C9955BC3}
@@ -37,8 +39,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testmp", "scanner\TestScann
 	ProjectSection(ProjectDependencies) = postProject
 		{25B55853-ED4A-4B50-AFCA-B716C9955BC3} = {25B55853-ED4A-4B50-AFCA-B716C9955BC3}
 	EndProjectSection
-EndProject
-Project("{F088123C-0E9E-452A-89E6-6BA2F21D5CAC}") = "scanneruml", "scanneruml\scanneruml.modelproj", "{E7862FEA-F8E8-4F43-A7D6-A752C9BE1137}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -192,26 +192,6 @@ Global
 		{2C757C84-32D6-49D7-8E71-C9913C52FBE5}.RelWithDebInfo|Mixed Platforms.Build.0 = RelWithDebInfo|x64
 		{2C757C84-32D6-49D7-8E71-C9913C52FBE5}.RelWithDebInfo|x64.ActiveCfg = RelWithDebInfo|x64
 		{2C757C84-32D6-49D7-8E71-C9913C52FBE5}.RelWithDebInfo|x64.Build.0 = RelWithDebInfo|x64
-		{E7862FEA-F8E8-4F43-A7D6-A752C9BE1137}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E7862FEA-F8E8-4F43-A7D6-A752C9BE1137}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E7862FEA-F8E8-4F43-A7D6-A752C9BE1137}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{E7862FEA-F8E8-4F43-A7D6-A752C9BE1137}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{E7862FEA-F8E8-4F43-A7D6-A752C9BE1137}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{E7862FEA-F8E8-4F43-A7D6-A752C9BE1137}.MinSizeRel|Any CPU.ActiveCfg = Release|Any CPU
-		{E7862FEA-F8E8-4F43-A7D6-A752C9BE1137}.MinSizeRel|Any CPU.Build.0 = Release|Any CPU
-		{E7862FEA-F8E8-4F43-A7D6-A752C9BE1137}.MinSizeRel|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{E7862FEA-F8E8-4F43-A7D6-A752C9BE1137}.MinSizeRel|Mixed Platforms.Build.0 = Release|Any CPU
-		{E7862FEA-F8E8-4F43-A7D6-A752C9BE1137}.MinSizeRel|x64.ActiveCfg = Release|Any CPU
-		{E7862FEA-F8E8-4F43-A7D6-A752C9BE1137}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E7862FEA-F8E8-4F43-A7D6-A752C9BE1137}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E7862FEA-F8E8-4F43-A7D6-A752C9BE1137}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{E7862FEA-F8E8-4F43-A7D6-A752C9BE1137}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{E7862FEA-F8E8-4F43-A7D6-A752C9BE1137}.Release|x64.ActiveCfg = Release|Any CPU
-		{E7862FEA-F8E8-4F43-A7D6-A752C9BE1137}.RelWithDebInfo|Any CPU.ActiveCfg = Release|Any CPU
-		{E7862FEA-F8E8-4F43-A7D6-A752C9BE1137}.RelWithDebInfo|Any CPU.Build.0 = Release|Any CPU
-		{E7862FEA-F8E8-4F43-A7D6-A752C9BE1137}.RelWithDebInfo|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{E7862FEA-F8E8-4F43-A7D6-A752C9BE1137}.RelWithDebInfo|Mixed Platforms.Build.0 = Release|Any CPU
-		{E7862FEA-F8E8-4F43-A7D6-A752C9BE1137}.RelWithDebInfo|x64.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
