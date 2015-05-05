@@ -907,6 +907,7 @@ void SemanticAnalyser::cast(DataType valType, DataType toType)
 
 void SemanticAnalyser::writeCommand(const string command)
 {
+    cout << command << "\n";  //prints out the machine code
 	_outFile << command << "\n";
 	_outFile.flush();
 }
