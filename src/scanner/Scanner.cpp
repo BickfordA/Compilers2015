@@ -143,7 +143,7 @@ void Scanner::checkReserved(Token& token)
 const int Scanner::indexInReservedWords(const std::string& name) 
 {
 	//kick off the binary search of reserved words 
-	return indexInReservedWordsHelper(name, 33, 16, 0);
+	return indexInReservedWordsHelper(name, 32, 16, 0);
 }
 
 const int Scanner::indexInReservedWordsHelper(const std::string& name, int top, int middle, int bottom)
