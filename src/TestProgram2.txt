@@ -3,8 +3,29 @@ program Program2;
     Fred : integer;
     X : integer;
   begin
-    Apples := 0;
+    Apples := 5;
     X := 10;
-    Fred := Apples + Apples * X;
-    Write('Apples = ', Apples, '; X = ', X,' and Fred = ', Fred)
-  end.
+
+    Fred := Apples + Apples div X;
+    Write('Apples = ', Apples, '; X = ', X,' and 5.5Fred = ', Fred) ;   
+    
+    Fred := Apples - Apples * X;
+    Write('Apples = ', Apples, '; X = ', X,' and -45Fred = ', Fred);
+    
+    Fred := Apples - Apples div X;
+    Write('Apples = ', Apples, '; X = ', X,' and 4.5Fred = ', Fred);
+    
+    Fred := Apples div Apples * X;
+    Write('Apples = ', Apples, '; X = ', X,' and 0.1Fred = ', Fred);
+    
+    Fred := Apples + Apples - X;
+    Write('Apples = ', Apples, '; X = ', X,' and 0Fred = ', Fred);
+    
+    
+    Fred := Apples * Apples * X;
+    Write('Apples = ', Apples, '; X = ', X,' and 250Fred = ', Fred);
+    
+    Fred := Apples - Apples - X;
+    Write('Apples = ', Apples, '; X = ', X,' and -10Fred = ', Fred);
+  
+end.

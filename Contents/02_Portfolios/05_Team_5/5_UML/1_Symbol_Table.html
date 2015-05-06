@@ -112,21 +112,31 @@ Compilers 2014
 <!-- InstanceBeginEditable name="Main" -->
 <h1>UML</h1>
 <p>
-As noted elsewhere, a clear outline was given to all teams for the design and implementation of the scanner, parser, and semantic analyzer. With approval, teams were allowed to vary their actual designs and implmementations. The scanner was the only module that required UML ahead of time. That is provided on this page along with the UML for the scanner as it actually was implemented.
+During the implementation of the complier, there was not any specific design on how to write the methods in each class. The complier implementation went with the flow.
+So, to draw the UML we used "Visual Paradigm 12.1", a tool which reverse engineers a c++ file from code to UML. We have generated the class diagrams for the Parser part of our project and presented here.
 </p>
 
 <!--
 Attach the UML design diagrams for your capstone project that were created before you began coding your project.
 -->
-<h2>Symbol Table UML (Before Coding)</h2>
+<h2>UML for Parser</h2>
 
-<p><img src="before.jpg" width="800" /></p>
+<h3>UML Class diagram with relationships between Semantic analyzer and Grammar.</h3>
+<p><img src="UMLimages/SemAnaGram.PNG"></p>
+<h3>UML Class diagram - Operand.</h3>
+<p><img src="UMLimages/Operand.PNG"></p>
+<h3>UML Class diagram - Operand and Semantic Record.</h3>
+<p><img src="UMLimages/OpeSemRec.PNG"></p>
+<h3>UML Class diagram - Symbol Table and Symbol.</h3>
+<p><img src="UMLimages/SymT Sym.PNG"></p>
 
-<p>After our initial design of the symbol table and its implementation, we realized we needed to add functionality to the symbol Table. For example, the runtime address offsets needed to be stored in the symbol table as well as well as the nesting level. Fortunately, our initial design only needed to be modified by adding attributes and methods to the Table class and the Symbol class. The basic design of symbol storage in the Table class and the recursive nature of the Table class did not need to be modified.</p>
+<h2>UML for Scanner</h2>
+<h3>UML Class diagram - Scanner.</h3>
+<p><img src="UMLimages/TestScanner.PNG"></p>
 
-<h2>Symbol Table UML (Revised After Coding)</h2>
 
-<p><img src="after.jpg" width="800" /></p>
+
+
 
 <!-- InstanceEndEditable -->
 
