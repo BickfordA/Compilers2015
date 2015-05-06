@@ -6,8 +6,12 @@
 
 /src/_build
 
+/src/_build64
+
 /_eclipse
 
 /xcode
 
 /_build
+
+/_build64
