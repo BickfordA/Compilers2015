@@ -1,0 +1,1 @@
+program test;var	a,b: Integer;	g: Float;		procedure tryit(var varx: Integer; g: Float);		var a: Integer;		begin		 a := 10;		 b := a + b * varx;		 varx := a;		 g := b * g;		end;	begin			a := 5;		b := 6;		g := 5.5;		tryit(a, g);		writeln(‘a = ‘, a);		writeln(‘b = ‘, b);		writeln(‘g = ‘, g);			end.
